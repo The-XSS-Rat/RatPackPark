@@ -1,0 +1,12 @@
+.git
+vendor/
+composer.lock
+composer.phar
+docker-compose.yml
+db-deployment.yaml
+web-deployment.yaml
+Dockerfile
+.dockerignore
+README.md
+*.log
+*.md

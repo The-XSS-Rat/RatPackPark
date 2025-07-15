@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratpack-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ratpack-web
+  template:
+    metadata:
+      labels:
+        app: ratpack-web
+    spec:
+      nodeSelector:
+        ratPackPark: prod
+      containers:
+      - name: web
+        image: unclerat/ratpackpark:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratpack-web
+spec:
+  type: LoadBalancer
+  selector:
+    app: ratpack-web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

@@ -1,0 +1,17 @@
+{
+    "name": "wesleythijs/rat-pack-park",
+    "autoload": {
+        "psr-4": {
+            "Wesleythijs\\RatPackPark\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "TheXSSRat",
+            "email": "info@thexssrat.com"
+        }
+    ],
+    "require": {
+        "firebase/php-jwt": "^6.11"
+    }
+}

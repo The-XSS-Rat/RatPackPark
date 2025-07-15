@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: themeparkdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: themeparkdb
+  template:
+    metadata:
+      labels:
+        app: themeparkdb
+    spec:
+      containers:
+      - name: db
+        image: mariadb:10.5
+        env:
+        - name: MARIADB_ROOT_PASSWORD
+          value: root
+        - name: MARIADB_DATABASE
+          value: themeparkdb
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: db-storage
+        - name: init-volume
+          mountPath: /docker-entrypoint-initdb.d/
+      volumes:
+      - name: db-storage
+        emptyDir: {}
+      - name: init-volume
+        configMap:
+          name: themepark-init-sql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: themeparkdb
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: themeparkdb
