@@ -1,0 +1,16 @@
+1. You can buy tickets from other instances.
+
+if (isset($_POST['buy_ticket'])) {
+    $ticket_id = (int)$_POST['ticket_id'];
+    $quantity = (int)$_POST['quantity'];
+
+    // Reduce available_quantity
+    $stmt = $pdo->prepare("UPDATE tickets SET available_quantity = available_quantity - ? WHERE id = ? AND available_quantity >= ?");
+    $stmt->execute([$quantity, $ticket_id, $quantity, $account_id]);
+
+    Should have included the AND account_id =?
+
+
+3. BAC: rosters.php is reachable for any acc type even if it isn't visible in the menu
+4. Business logic: You can order a negative amount of tickets 
+5. 

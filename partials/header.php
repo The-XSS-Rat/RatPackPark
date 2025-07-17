@@ -40,3 +40,4 @@
     </style>
 </head>
 <body>
+<!-- 'your-secret-key' should be replaced with your actual JWT secret key -->

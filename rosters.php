@@ -22,11 +22,6 @@ try {
     exit;
 }
 
-if (!in_array($role_id, [1, 2])) {
-    echo "Access denied. Only managers and admins can view rosters.";
-    exit;
-}
-
 if (isset($_GET['delete'])) {
     $delete_id = (int)$_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM shifts WHERE id = ?");

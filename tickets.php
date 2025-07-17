@@ -35,8 +35,8 @@ if (isset($_POST['buy_ticket'])) {
     $quantity = (int)$_POST['quantity'];
 
     // Reduce available_quantity
-    $stmt = $pdo->prepare("UPDATE tickets SET available_quantity = available_quantity - ? WHERE id = ? AND available_quantity >= ? AND account_id = ?");
-    $stmt->execute([$quantity, $ticket_id, $quantity, $account_id]);
+    $stmt = $pdo->prepare("UPDATE tickets SET available_quantity = available_quantity - ? WHERE id = ? AND available_quantity >= ?");
+    $stmt->execute([$quantity, $ticket_id, $quantity]);
 
     if ($stmt->rowCount()) {
         // Record the sale
