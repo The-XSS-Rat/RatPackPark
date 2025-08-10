@@ -19,11 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password_hash'])) {
             // Create JWT payload
+            $stmt = $pdo->prepare("SELECT right_name FROM role_rights WHERE role_id = ?");
+            $stmt->execute([$user['role_id']]);
+            $rights = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
             $payload = [
                 'sub' => $user['id'],
                 'username' => $user['username'],
                 'role_id' => $user['role_id'],
                 'account_id' => $user['account_id'],
+                'rights' => $rights,
                 'iat' => time(),
                 'exp' => time() + (60 * 60) // 1 hour
             ];

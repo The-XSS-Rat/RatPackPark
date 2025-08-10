@@ -16,6 +16,7 @@ try {
     $decoded = JWT::decode($_SESSION['jwt'], new Key($jwt_secret, 'HS256'));
     $username = $decoded->username;
     $role_id = $decoded->role_id;
+    $rights = $decoded->rights ?? [];
 } catch (Exception $e) {
     session_destroy();
     header('Location: login.php');

@@ -15,13 +15,14 @@ if (!isset($_SESSION['jwt'])) {
 try {
     $decoded = JWT::decode($_SESSION['jwt'], new Key($jwt_secret, 'HS256'));
     $role_id = $decoded->role_id;
+    $rights = $decoded->rights ?? [];
 } catch (Exception $e) {
     echo "Invalid session.";
     exit;
 }
 
-if (!in_array($role_id, [1, 2])) {
-    echo "Access denied. Admins and Managers only.";
+if (!in_array('maintenance', $rights)) {
+    echo "Access denied.";
     exit;
 }
 ?>

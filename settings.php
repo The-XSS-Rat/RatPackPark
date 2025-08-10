@@ -1,3 +1,30 @@
+<?php
+require 'vendor/autoload.php';
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+session_start();
+$jwt_secret = 'your-secret-key';
+
+if (!isset($_SESSION['jwt'])) {
+    http_response_code(401);
+    echo "Not authenticated";
+    exit;
+}
+
+try {
+    $decoded = JWT::decode($_SESSION['jwt'], new Key($jwt_secret, 'HS256'));
+    $rights = $decoded->rights ?? [];
+} catch (Exception $e) {
+    echo "Invalid session.";
+    exit;
+}
+
+if (!in_array('settings', $rights)) {
+    echo "Access denied.";
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

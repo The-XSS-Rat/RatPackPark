@@ -24,13 +24,14 @@ try {
     $decoded = JWT::decode($_SESSION['jwt'], new Key($jwt_secret, 'HS256'));
     $role_id = $decoded->role_id;
     $account_id = $decoded->account_id;
+    $rights = $decoded->rights ?? [];
 } catch (Exception $e) {
     echo "Invalid session.";
     exit;
 }
 
-if ($role_id != 1) {
-    echo "Access denied. Admins only.";
+if (!in_array('analytics', $rights)) {
+    echo "Access denied.";
     exit;
 }
 

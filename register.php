@@ -30,11 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$account_id, $role_id, $username, $email, $password_hash]);
 
             $user_id = $pdo->lastInsertId();
+            $stmt = $pdo->prepare("SELECT right_name FROM role_rights WHERE role_id = ?");
+            $stmt->execute([$role_id]);
+            $rights = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
             $payload = [
                 'sub' => $user_id,
                 'username' => $username,
                 'role_id' => $role_id,
                 'account_id' => $account_id,
+                'rights' => $rights,
+
                 'iat' => time(),
                 'exp' => time() + (60 * 60)
             ];
