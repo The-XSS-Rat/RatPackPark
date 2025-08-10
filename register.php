@@ -2,14 +2,12 @@
 // register.php (admin-only registration + intro explanation)
 require 'vendor/autoload.php';
 require 'db.php';
+use Firebase\JWT\JWT;
+
+session_start();
 
 // Force all registrations to be admin-level (role_id = 1)
 $role_id = 1;
-// Create a new account for this admin
-$stmt = $pdo->prepare("INSERT INTO accounts (name, contact_email) VALUES (?, ?)");
-$accountName = $username . "'s Theme Park";
-$stmt->execute([$accountName, $email]);
-$account_id = $pdo->lastInsertId();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
@@ -19,12 +17,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$username || !$email || !$password) {
         $error = 'Please fill in all required fields.';
     } else {
+        // Create a new account for this admin
+        $stmt = $pdo->prepare("INSERT INTO accounts (name, contact_email) VALUES (?, ?)");
+        $accountName = $username . "'s Theme Park";
+        $stmt->execute([$accountName, $email]);
+        $account_id = $pdo->lastInsertId();
+
         $password_hash = password_hash($password, PASSWORD_BCRYPT);
 
         try {
             $stmt = $pdo->prepare("INSERT INTO users (account_id, role_id, username, email, password_hash) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$account_id, $role_id, $username, $email, $password_hash]);
-            $success = 'Welcome to RatPack Park! Your admin account has been created. You can now log in and begin managing your park!';
+
+            $user_id = $pdo->lastInsertId();
+            $payload = [
+                'sub' => $user_id,
+                'username' => $username,
+                'role_id' => $role_id,
+                'account_id' => $account_id,
+                'iat' => time(),
+                'exp' => time() + (60 * 60)
+            ];
+            $jwt = JWT::encode($payload, 'your-secret-key', 'HS256');
+            $_SESSION['jwt'] = $jwt;
+
+            header('Location: dashboard.php');
+            exit;
         } catch (PDOException $e) {
             $error = 'Error: ' . $e->getMessage();
         }
