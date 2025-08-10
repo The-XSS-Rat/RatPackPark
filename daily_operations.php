@@ -44,54 +44,46 @@ function getSalesData($pdo, $date) {
     if (!$row) {
         return ['guests' => 0, 'revenue' => 0];
     }
-    return ['guests' => $row['guests'] ?? 0, 'revenue' => $row['revenue'] ?? 0];
+    return ['guests' => ($row['guests'] ?? 0) ?: 0, 'revenue' => ($row['revenue'] ?? 0) ?: 0];
 }
 
 $sales = getSalesData($pdo, $operation_date);
-$guest_count = $sales['guests'];
-$base_revenue = $sales['revenue'];
+$guest_count = (int)$sales['guests'];
+$base_revenue = (float)$sales['revenue'];
 
 $stmt = $pdo->prepare("SELECT * FROM daily_operations WHERE user_id = ? AND operation_date = ?");
 $stmt->execute([$user_id, $operation_date]);
 $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$data) {
+    // Pull previous state to seed today's defaults
     $stmt = $pdo->prepare("SELECT stock, land, attractions, stalls FROM daily_operations WHERE user_id = ? ORDER BY operation_date DESC LIMIT 1");
     $stmt->execute([$user_id]);
     $prev = $stmt->fetch(PDO::FETCH_ASSOC);
-    $prev_stock = $prev['stock'] ?? 100;
-    $land = $prev['land'] ?? 0;
-    $attractions = $prev['attractions'] ?? 0;
-    $stalls = $prev['stalls'] ?? 0;
 
+    $prev_stock = isset($prev['stock']) ? (int)$prev['stock'] : 100;
+    $land = isset($prev['land']) ? (int)$prev['land'] : 0;
+    $attractions = isset($prev['attractions']) ? (int)$prev['attractions'] : 0;
+    $stalls = isset($prev['stalls']) ? (int)$prev['stalls'] : 0;
+
+    // Generate today's values
     $weather_options = ['Sunny','Cloudy','Rainy','Stormy','Windy','Snowy'];
     $weather = $weather_options[array_rand($weather_options)];
+
     $stock_change = random_int(-10, 10);
     $stock = max(0, $prev_stock + $stock_change);
+
     $incoming_money = $base_revenue + ($land * 100) + ($attractions * 75) + ($stalls * 50);
     $outgoing_money = random_int(100, 500) + ($land * 20) + ($attractions * 15) + ($stalls * 10);
 
+    // Single INSERT only (fixes duplicate key issue)
     $stmt = $pdo->prepare("INSERT INTO daily_operations (user_id, operation_date, guest_count, weather, incoming_money, outgoing_money, stock, land, attractions, stalls) VALUES (?,?,?,?,?,?,?,?,?,?)");
     $stmt->execute([$user_id, $operation_date, $guest_count, $weather, $incoming_money, $outgoing_money, $stock, $land, $attractions, $stalls]);
-    $stmt = $pdo->prepare("SELECT stock FROM daily_operations WHERE user_id = ? ORDER BY operation_date DESC LIMIT 1");
-    $stmt->execute([$user_id]);
-    $prev_stock = $stmt->fetchColumn();
-    if ($prev_stock === false) {
-        $prev_stock = 100;
-    }
 
-    $guest_count = random_int(50, 200);
-    $weather_options = ['Sunny','Cloudy','Rainy','Stormy','Windy','Snowy'];
-    $weather = $weather_options[array_rand($weather_options)];
-    $incoming_money = $guest_count * random_int(20, 50);
-    $outgoing_money = random_int(100, 500);
-    $stock_change = random_int(-10, 10);
-    $stock = max(0, $prev_stock + $stock_change);
-
-    $stmt = $pdo->prepare("INSERT INTO daily_operations (user_id, operation_date, guest_count, weather, incoming_money, outgoing_money, stock) VALUES (?,?,?,?,?,?,?)");
-    $stmt->execute([$user_id, $operation_date, $guest_count, $weather, $incoming_money, $outgoing_money, $stock]);
-
+    // Build $data including its new ID for later updates
+    $insert_id = $pdo->lastInsertId();
     $data = [
+        'id' => $insert_id,
         'guest_count' => $guest_count,
         'weather' => $weather,
         'incoming_money' => $incoming_money,
@@ -102,12 +94,16 @@ if (!$data) {
         'stalls' => $stalls
     ];
 } else {
-    $land = $data['land'];
-    $attractions = $data['attractions'];
-    $stalls = $data['stalls'];
+    // Recalculate income from sales + assets and update existing row
+    $land = (int)$data['land'];
+    $attractions = (int)$data['attractions'];
+    $stalls = (int)$data['stalls'];
+
     $incoming_money = $base_revenue + ($land * 100) + ($attractions * 75) + ($stalls * 50);
+
     $stmt = $pdo->prepare("UPDATE daily_operations SET guest_count=?, incoming_money=? WHERE id=?");
     $stmt->execute([$guest_count, $incoming_money, $data['id']]);
+
     $data['guest_count'] = $guest_count;
     $data['incoming_money'] = $incoming_money;
 }
@@ -115,19 +111,26 @@ if (!$data) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type'])) {
     $costs = ['land' => 1000, 'attraction' => 500, 'stall' => 200];
     $type = $_POST['type'];
+
     if (isset($costs[$type])) {
+        $land = (int)$data['land'];
+        $attractions = (int)$data['attractions'];
+        $stalls = (int)$data['stalls'];
+        $current_outgoing = (float)$data['outgoing_money'];
+
         if ($type === 'land') { $land++; }
         if ($type === 'attraction') { $attractions++; }
         if ($type === 'stall') { $stalls++; }
-        $outgoing_money = $data['outgoing_money'] + $costs[$type];
+
+        $outgoing_money = $current_outgoing + $costs[$type];
         $incoming_money = $base_revenue + ($land * 100) + ($attractions * 75) + ($stalls * 50);
+
         $stmt = $pdo->prepare("UPDATE daily_operations SET land=?, attractions=?, stalls=?, outgoing_money=?, incoming_money=? WHERE id=?");
         $stmt->execute([$land, $attractions, $stalls, $outgoing_money, $incoming_money, $data['id']]);
+
         header("Location: daily_operations.php?date=" . urlencode($operation_date));
         exit;
     }
-        'stock' => $stock
-    ];
 }
 ?>
 <!DOCTYPE html>
@@ -139,14 +142,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type']
 <body>
 <h2>Daily Operations for <?php echo htmlspecialchars($operation_date); ?></h2>
 <ul>
-    <li>Guest count: <?php echo htmlspecialchars($data['guest_count']); ?></li>
-    <li>Weather: <?php echo htmlspecialchars($data['weather']); ?></li>
-    <li>Incoming money: $<?php echo htmlspecialchars(number_format($data['incoming_money'], 2)); ?></li>
-    <li>Outgoing money: $<?php echo htmlspecialchars(number_format($data['outgoing_money'], 2)); ?></li>
-    <li>Stock: <?php echo htmlspecialchars($data['stock']); ?></li>
-    <li>Land: <?php echo htmlspecialchars($data['land']); ?></li>
-    <li>Attractions: <?php echo htmlspecialchars($data['attractions']); ?></li>
-    <li>Food/Drink Stalls: <?php echo htmlspecialchars($data['stalls']); ?></li>
+    <li>Guest count: <?php echo htmlspecialchars((string)$data['guest_count']); ?></li>
+    <li>Weather: <?php echo htmlspecialchars((string)$data['weather']); ?></li>
+    <li>Incoming money: $<?php echo htmlspecialchars(number_format((float)$data['incoming_money'], 2)); ?></li>
+    <li>Outgoing money: $<?php echo htmlspecialchars(number_format((float)$data['outgoing_money'], 2)); ?></li>
+    <li>Stock: <?php echo htmlspecialchars((string)$data['stock']); ?></li>
+    <li>Land: <?php echo htmlspecialchars((string)$data['land']); ?></li>
+    <li>Attractions: <?php echo htmlspecialchars((string)$data['attractions']); ?></li>
+    <li>Food/Drink Stalls: <?php echo htmlspecialchars((string)$data['stalls']); ?></li>
 </ul>
 <form method="post">
     <button type="submit" name="buy" value="1" onclick="this.form.type.value='land'">Buy Land ($1000)</button>
@@ -154,6 +157,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type']
     <button type="submit" name="buy" value="1" onclick="this.form.type.value='stall'">Buy Food/Drink Stall ($200)</button>
     <input type="hidden" name="type" value="">
 </form>
-</ul>
 </body>
 </html>
