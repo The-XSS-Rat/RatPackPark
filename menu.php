@@ -10,6 +10,7 @@ $menu_items = [
     ['label' => 'Report a problem', 'url' => 'problem.php', 'rights' => ['report_problem']],
     ['label' => 'Admin problem overview', 'url' => 'admin_problem.php', 'rights' => ['admin_problem']],
     ['label' => 'Role Management', 'url' => 'role_management.php', 'rights' => ['roles_management']],
+    ['label' => 'Daily Operations', 'url' => 'daily_operations.php', 'rights' => ['daily_operations']],
     ['label' => 'Logout', 'url' => 'logout.php', 'rights' => ['logout']],
 ];
 
