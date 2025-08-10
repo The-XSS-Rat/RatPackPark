@@ -145,6 +145,7 @@ INSERT INTO `role_rights` (`role_id`, `right_name`) VALUES
 (1, 'user_management'),
 (1, 'roles_management'),
 (1, 'logout'),
+(1, 'daily_operations'),
 (2, 'rosters'),
 (2, 'tickets'),
 (2, 'my_roster'),
@@ -259,6 +260,26 @@ INSERT INTO `users` (`id`, `account_id`, `role_id`, `username`, `email`, `passwo
 (7, 1, 4, 'low', 'low@thexssrat.com', '$2y$10$XN5axlfiLHkmoAVm0jPy6uWrxZ0OyY1E9JPKSlpDKQA.Bvp4BTAFm', '2025-07-15 13:45:32'),
 (8, 1, 2, 'man', 'man@thexss.com', '$2y$10$Mljoo5mQo8zxd5hI0eu60usZPGdPBfcaV.dRWslSb215DP4FS6TWm', '2025-07-15 13:46:54');
 
+-- --------------------------------------------------------
+
+-- Table structure for table `daily_operations`
+--
+
+CREATE TABLE `daily_operations` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `operation_date` date NOT NULL,
+  `guest_count` int(11) DEFAULT NULL,
+  `weather` varchar(50) DEFAULT NULL,
+  `incoming_money` decimal(10,2) DEFAULT NULL,
+  `outgoing_money` decimal(10,2) DEFAULT NULL,
+  `stock` int(11) DEFAULT NULL,
+  `land` int(11) DEFAULT 0,
+  `attractions` int(11) DEFAULT 0,
+  `stalls` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexen voor geëxporteerde tabellen
 --
@@ -329,6 +350,12 @@ ALTER TABLE `users`
   ADD KEY `account_id` (`account_id`),
   ADD KEY `role_id` (`role_id`);
 
+-- Indexen voor tabel `daily_operations`
+ALTER TABLE `daily_operations`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id_operation_date` (`user_id`,`operation_date`),
+  ADD KEY `user_id` (`user_id`);
+
 --
 -- AUTO_INCREMENT voor geëxporteerde tabellen
 --
@@ -381,6 +408,11 @@ ALTER TABLE `tickets`
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
+-- AUTO_INCREMENT voor een tabel `daily_operations`
+--
+ALTER TABLE `daily_operations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 --
 -- Beperkingen voor geëxporteerde tabellen
 --
@@ -424,6 +456,10 @@ ALTER TABLE `tickets`
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
+
+-- Beperkingen voor tabel `daily_operations`
+ALTER TABLE `daily_operations`
+  ADD CONSTRAINT `daily_operations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Beperkingen voor tabel `role_rights`
