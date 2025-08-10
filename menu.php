@@ -4,6 +4,7 @@ $menu_items = [
     ['label' => 'Settings', 'url' => 'settings.php', 'rights' => ['settings']],
     ['label' => 'Rosters', 'url' => 'rosters.php', 'rights' => ['rosters']],
     ['label' => 'Tickets', 'url' => 'tickets.php', 'rights' => ['tickets']],
+    ['label' => 'Special Discounts', 'url' => 'special_discounts.php', 'rights' => ['tickets']],
     ['label' => 'My Roster', 'url' => 'my_roster.php', 'rights' => ['my_roster']],
     ['label' => 'Analytics', 'url' => 'analytics.php', 'rights' => ['analytics']],
     ['label' => 'Maintenance', 'url' => 'maintenance.php', 'rights' => ['maintenance']],

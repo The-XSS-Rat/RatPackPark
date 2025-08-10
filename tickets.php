@@ -49,9 +49,16 @@ if (isset($_POST['buy_ticket'])) {
     }
 }
 
-$stmt = $pdo->prepare("SELECT * FROM tickets WHERE available_quantity > 0 AND account_id = ? ORDER BY created_at DESC");
+$stmt = $pdo->prepare("SELECT t.*, MAX(td.discount_percent) as discount_percent FROM tickets t LEFT JOIN ticket_discounts td ON t.id = td.ticket_id AND NOW() BETWEEN td.start_datetime AND td.end_datetime WHERE t.available_quantity > 0 AND t.account_id = ? GROUP BY t.id ORDER BY t.created_at DESC");
 $stmt->execute([$account_id]);
 $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($tickets as &$ticket) {
+    if (!empty($ticket['discount_percent'])) {
+        $ticket['discounted_price'] = $ticket['price'] * (1 - $ticket['discount_percent'] / 100);
+    }
+}
+unset($ticket);
 ?>
 
 <!DOCTYPE html>
@@ -84,7 +91,13 @@ $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($tickets as $ticket): ?>
                 <tr>
                     <td><?= htmlspecialchars($ticket['name']) ?></td>
-                    <td>&euro;<?= number_format($ticket['price'], 2) ?></td>
+                    <td>
+                        <?php if (!empty($ticket['discounted_price'])): ?>
+                            <s>&euro;<?= number_format($ticket['price'], 2) ?></s> &euro;<?= number_format($ticket['discounted_price'], 2) ?>
+                        <?php else: ?>
+                            &euro;<?= number_format($ticket['price'], 2) ?>
+                        <?php endif; ?>
+                    </td>
                     <td><?= $ticket['available_quantity'] ?></td>
                     <td>
                         <form method="POST">
