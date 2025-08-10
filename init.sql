@@ -274,6 +274,9 @@ CREATE TABLE `daily_operations` (
   `incoming_money` decimal(10,2) DEFAULT NULL,
   `outgoing_money` decimal(10,2) DEFAULT NULL,
   `stock` int(11) DEFAULT NULL,
+  `land` int(11) DEFAULT 0,
+  `attractions` int(11) DEFAULT 0,
+  `stalls` int(11) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
