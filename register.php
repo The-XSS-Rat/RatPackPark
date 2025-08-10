@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'role_id' => $role_id,
                 'account_id' => $account_id,
                 'rights' => $rights,
+
                 'iat' => time(),
                 'exp' => time() + (60 * 60)
             ];
