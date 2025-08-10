@@ -121,6 +121,45 @@ INSERT INTO `roles` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `role_rights`
+--
+
+CREATE TABLE `role_rights` (
+  `role_id` int(11) NOT NULL,
+  `right_name` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `role_rights`
+--
+
+INSERT INTO `role_rights` (`role_id`, `right_name`) VALUES
+(1, 'settings'),
+(1, 'rosters'),
+(1, 'tickets'),
+(1, 'my_roster'),
+(1, 'analytics'),
+(1, 'maintenance'),
+(1, 'report_problem'),
+(1, 'admin_problem'),
+(1, 'user_management'),
+(1, 'roles_management'),
+(1, 'logout'),
+(2, 'rosters'),
+(2, 'tickets'),
+(2, 'my_roster'),
+(2, 'maintenance'),
+(2, 'report_problem'),
+(2, 'logout'),
+(3, 'tickets'),
+(3, 'logout'),
+(4, 'my_roster'),
+(4, 'report_problem'),
+(4, 'logout');
+
+-- --------------------------------------------------------
+
+--
 -- Tabelstructuur voor tabel `sales`
 --
 
@@ -254,6 +293,12 @@ ALTER TABLE `roles`
   ADD UNIQUE KEY `name` (`name`);
 
 --
+-- Indexen voor tabel `role_rights`
+--
+ALTER TABLE `role_rights`
+  ADD KEY `role_id` (`role_id`);
+
+--
 -- Indexen voor tabel `sales`
 --
 ALTER TABLE `sales`
@@ -379,6 +424,12 @@ ALTER TABLE `tickets`
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
+
+--
+-- Beperkingen voor tabel `role_rights`
+--
+ALTER TABLE `role_rights`
+  ADD CONSTRAINT `role_rights_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

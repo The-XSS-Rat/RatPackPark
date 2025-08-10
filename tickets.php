@@ -20,13 +20,14 @@ try {
     $role_id = $decoded->role_id;
     $account_id = $decoded->account_id;
     $user_id = $decoded->sub;
+    $rights = $decoded->rights ?? [];
 } catch (Exception $e) {
     echo "Invalid session.";
     exit;
 }
 
-if (!in_array($role_id, [1, 2, 3])) {
-    echo "Access denied. Ticket sales staff only.";
+if (!in_array('tickets', $rights)) {
+    echo "Access denied.";
     exit;
 }
 

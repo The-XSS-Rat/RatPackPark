@@ -18,13 +18,14 @@ try {
     $role_id = $decoded->role_id;
     $account_id = $decoded->account_id;
     $user_id = $decoded->sub;
+    $rights = $decoded->rights ?? [];
 } catch (Exception $e) {
     echo "Invalid session.";
     exit;
 }
 
-if (!in_array($role_id, [1, 2, 4])) {
-    echo "Access denied. This page is for admins, managers, and operators only.";
+if (!in_array('my_roster', $rights)) {
+    echo "Access denied.";
     exit;
 }
 

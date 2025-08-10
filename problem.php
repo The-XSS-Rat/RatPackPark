@@ -16,6 +16,7 @@ if (!isset($_SESSION['jwt'])) {
 try {
     $decoded = JWT::decode($_SESSION['jwt'], new Key($jwt_secret, 'HS256'));
     $role_id = $decoded->role_id;
+    $rights = $decoded->rights ?? [];
     $account_id = $decoded->account_id;
     $submitted_by = $decoded->sub;
 } catch (Exception $e) {
@@ -23,8 +24,8 @@ try {
     exit;
 }
 
-if (!in_array($role_id, [1, 2, 4])) {
-    echo "Access denied. Only Admins and Managers can report problems.";
+if (!in_array('report_problem', $rights)) {
+    echo "Access denied.";
     exit;
 }
 
