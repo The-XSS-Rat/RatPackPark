@@ -73,6 +73,23 @@ if (!$data) {
 
     $stmt = $pdo->prepare("INSERT INTO daily_operations (user_id, operation_date, guest_count, weather, incoming_money, outgoing_money, stock, land, attractions, stalls) VALUES (?,?,?,?,?,?,?,?,?,?)");
     $stmt->execute([$user_id, $operation_date, $guest_count, $weather, $incoming_money, $outgoing_money, $stock, $land, $attractions, $stalls]);
+    $stmt = $pdo->prepare("SELECT stock FROM daily_operations WHERE user_id = ? ORDER BY operation_date DESC LIMIT 1");
+    $stmt->execute([$user_id]);
+    $prev_stock = $stmt->fetchColumn();
+    if ($prev_stock === false) {
+        $prev_stock = 100;
+    }
+
+    $guest_count = random_int(50, 200);
+    $weather_options = ['Sunny','Cloudy','Rainy','Stormy','Windy','Snowy'];
+    $weather = $weather_options[array_rand($weather_options)];
+    $incoming_money = $guest_count * random_int(20, 50);
+    $outgoing_money = random_int(100, 500);
+    $stock_change = random_int(-10, 10);
+    $stock = max(0, $prev_stock + $stock_change);
+
+    $stmt = $pdo->prepare("INSERT INTO daily_operations (user_id, operation_date, guest_count, weather, incoming_money, outgoing_money, stock) VALUES (?,?,?,?,?,?,?)");
+    $stmt->execute([$user_id, $operation_date, $guest_count, $weather, $incoming_money, $outgoing_money, $stock]);
 
     $data = [
         'guest_count' => $guest_count,
@@ -109,6 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type']
         header("Location: daily_operations.php?date=" . urlencode($operation_date));
         exit;
     }
+        'stock' => $stock
+    ];
 }
 ?>
 <!DOCTYPE html>
@@ -135,5 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type']
     <button type="submit" name="buy" value="1" onclick="this.form.type.value='stall'">Buy Food/Drink Stall ($200)</button>
     <input type="hidden" name="type" value="">
 </form>
+</ul>
 </body>
 </html>
