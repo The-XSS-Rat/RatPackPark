@@ -233,6 +233,27 @@ INSERT INTO `tickets` (`id`, `account_id`, `name`, `price`, `available_quantity`
 -- --------------------------------------------------------
 
 --
+-- Tabelstructuur voor tabel `ticket_discounts`
+--
+
+CREATE TABLE `ticket_discounts` (
+  `id` int(11) NOT NULL,
+  `ticket_id` int(11) DEFAULT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime NOT NULL,
+  `discount_percent` decimal(5,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `ticket_discounts`
+--
+
+INSERT INTO `ticket_discounts` (`id`, `ticket_id`, `start_datetime`, `end_datetime`, `discount_percent`) VALUES
+(1, 1, '2025-12-01 09:00:00', '2025-12-01 12:00:00', 20.00);
+
+-- --------------------------------------------------------
+
+--
 -- Tabelstructuur voor tabel `users`
 --
 
@@ -341,6 +362,11 @@ ALTER TABLE `tickets`
   ADD PRIMARY KEY (`id`),
   ADD KEY `account_id` (`account_id`);
 
+-- Indexen voor tabel `ticket_discounts`
+ALTER TABLE `ticket_discounts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ticket_id` (`ticket_id`);
+
 --
 -- Indexen voor tabel `users`
 --
@@ -402,6 +428,10 @@ ALTER TABLE `shifts`
 ALTER TABLE `tickets`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
+-- AUTO_INCREMENT voor een tabel `ticket_discounts`
+ALTER TABLE `ticket_discounts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
 --
 -- AUTO_INCREMENT voor een tabel `users`
 --
@@ -449,6 +479,10 @@ ALTER TABLE `shifts`
 --
 ALTER TABLE `tickets`
   ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE;
+
+-- Beperkingen voor tabel `ticket_discounts`
+ALTER TABLE `ticket_discounts`
+  ADD CONSTRAINT `ticket_discounts_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE;
 
 --
 -- Beperkingen voor tabel `users`
