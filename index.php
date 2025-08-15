@@ -58,5 +58,4 @@ use Firebase\JWT\Key;
         <a class="button" href="register.php">Start Free Trial</a>
         <a class="button" href="login.php">Already a Member? Log In</a>
     </div>
-</body>
-</html>
+    <?php include 'partials/footer.php'; ?>
