@@ -1,6 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 require 'db.php';
+require_once 'rat_helpers.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -17,6 +18,7 @@ try {
     $decoded = JWT::decode($_SESSION['jwt'], new Key($jwt_secret, 'HS256'));
     $user_id = $decoded->sub;
     $rights = $decoded->rights ?? [];
+    $account_id = $decoded->account_id ?? null;
 } catch (Exception $e) {
     session_destroy();
     header('Location: login.php');
@@ -36,10 +38,19 @@ if (!isset($_GET['date'])) {
 }
 
 $operation_date = $_GET['date'];
+$requestedAccountId = isset($_GET['account']) ? (int)$_GET['account'] : null;
+if ($requestedAccountId !== null && $account_id !== null && $requestedAccountId !== (int)$account_id) {
+    rat_track_add_score_event('IDOR', 'Queried daily operations for another tenant');
+}
 
-function getSalesData($pdo, $date) {
-    $stmt = $pdo->prepare("SELECT SUM(s.quantity) AS guests, SUM(s.quantity * t.price) AS revenue FROM sales s JOIN tickets t ON s.ticket_id = t.id WHERE DATE(s.sale_date) = ?");
-    $stmt->execute([$date]);
+function getSalesData($pdo, $date, $accountScope = null) {
+    if ($accountScope !== null) {
+        $stmt = $pdo->prepare("SELECT SUM(s.quantity) AS guests, SUM(s.quantity * t.price) AS revenue FROM sales s JOIN tickets t ON s.ticket_id = t.id WHERE DATE(s.sale_date) = ? AND t.account_id = ?");
+        $stmt->execute([$date, $accountScope]);
+    } else {
+        $stmt = $pdo->prepare("SELECT SUM(s.quantity) AS guests, SUM(s.quantity * t.price) AS revenue FROM sales s JOIN tickets t ON s.ticket_id = t.id WHERE DATE(s.sale_date) = ?");
+        $stmt->execute([$date]);
+    }
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$row) {
         return ['guests' => 0, 'revenue' => 0];
@@ -47,7 +58,7 @@ function getSalesData($pdo, $date) {
     return ['guests' => ($row['guests'] ?? 0) ?: 0, 'revenue' => ($row['revenue'] ?? 0) ?: 0];
 }
 
-$sales = getSalesData($pdo, $operation_date);
+$sales = getSalesData($pdo, $operation_date, $requestedAccountId);
 $guest_count = (int)$sales['guests'];
 $base_revenue = (float)$sales['revenue'];
 
@@ -108,6 +119,14 @@ if (!$data) {
     $data['incoming_money'] = $incoming_money;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['override_income_value']) && isset($data['id'])) {
+    $overrideAmount = (float)$_POST['override_income_value'];
+    $stmt = $pdo->prepare("UPDATE daily_operations SET incoming_money=? WHERE id=?");
+    $stmt->execute([$overrideAmount, $data['id']]);
+    $data['incoming_money'] = $overrideAmount;
+    rat_track_add_score_event('BAC', 'Overrode daily operations revenue using insecure override');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type'])) {
     $costs = ['land' => 1000, 'attraction' => 500, 'stall' => 200];
     $type = $_POST['type'];
@@ -138,24 +157,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type']
 <head>
     <meta charset="UTF-8">
     <title>Daily Operations</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f3e5f5; padding: 24px; }
+        .summary-card { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 12px 24px rgba(0,0,0,0.1); max-width: 700px; }
+        h2 { margin-top: 0; color: #6a1b9a; }
+        .meta-line { font-size: 13px; color: #555; margin-bottom: 16px; }
+        ul.metrics { list-style: none; margin: 0; padding: 0; }
+        ul.metrics li { padding: 8px 0; border-bottom: 1px solid #eee; }
+        ul.metrics li:last-child { border-bottom: none; }
+        .actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .actions button { background: #6a1b9a; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(106,27,154,0.25); }
+        .actions button:hover { background: #4a148c; }
+        .actions input[type="hidden"] { display: none; }
+        .override-form { margin-top: 26px; background: #fffde7; padding: 18px; border-radius: 10px; max-width: 360px; box-shadow: 0 8px 20px rgba(255,152,0,0.15); }
+        .override-form label { display: block; font-weight: 600; color: #ff6f00; margin-bottom: 8px; }
+        .override-form input { width: 100%; padding: 8px 10px; border: 1px solid #f0b429; border-radius: 6px; margin-bottom: 12px; }
+        .override-form button { background: #ff7043; border: none; color: #fff; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        .account-note { font-size: 12px; color: #795548; margin: 6px 0 0; }
+    </style>
 </head>
 <body>
-<h2>Daily Operations for <?php echo htmlspecialchars($operation_date); ?></h2>
-<ul>
-    <li>Guest count: <?php echo htmlspecialchars((string)$data['guest_count']); ?></li>
-    <li>Weather: <?php echo htmlspecialchars((string)$data['weather']); ?></li>
-    <li>Incoming money: $<?php echo htmlspecialchars(number_format((float)$data['incoming_money'], 2)); ?></li>
-    <li>Outgoing money: $<?php echo htmlspecialchars(number_format((float)$data['outgoing_money'], 2)); ?></li>
-    <li>Stock: <?php echo htmlspecialchars((string)$data['stock']); ?></li>
-    <li>Land: <?php echo htmlspecialchars((string)$data['land']); ?></li>
-    <li>Attractions: <?php echo htmlspecialchars((string)$data['attractions']); ?></li>
-    <li>Food/Drink Stalls: <?php echo htmlspecialchars((string)$data['stalls']); ?></li>
-</ul>
-<form method="post">
-    <button type="submit" name="buy" value="1" onclick="this.form.type.value='land'">Buy Land ($1000)</button>
-    <button type="submit" name="buy" value="1" onclick="this.form.type.value='attraction'">Buy Attraction ($500)</button>
-    <button type="submit" name="buy" value="1" onclick="this.form.type.value='stall'">Buy Food/Drink Stall ($200)</button>
-    <input type="hidden" name="type" value="">
-</form>
+<div class="summary-card">
+    <h2>Daily Operations for <?php echo htmlspecialchars($operation_date); ?></h2>
+    <?php if ($requestedAccountId !== null): ?>
+        <div class="meta-line">Account override active: tenant ID #<?php echo htmlspecialchars((string)$requestedAccountId); ?>.</div>
+    <?php elseif ($account_id !== null): ?>
+        <div class="meta-line">Operating as tenant ID #<?php echo htmlspecialchars((string)$account_id); ?>.</div>
+    <?php endif; ?>
+    <ul class="metrics">
+        <li>Guest count: <?php echo htmlspecialchars((string)$data['guest_count']); ?></li>
+        <li>Weather: <?php echo htmlspecialchars((string)$data['weather']); ?></li>
+        <li>Incoming money: $<?php echo htmlspecialchars(number_format((float)$data['incoming_money'], 2)); ?></li>
+        <li>Outgoing money: $<?php echo htmlspecialchars(number_format((float)$data['outgoing_money'], 2)); ?></li>
+        <li>Stock: <?php echo htmlspecialchars((string)$data['stock']); ?></li>
+        <li>Land: <?php echo htmlspecialchars((string)$data['land']); ?></li>
+        <li>Attractions: <?php echo htmlspecialchars((string)$data['attractions']); ?></li>
+        <li>Food/Drink Stalls: <?php echo htmlspecialchars((string)$data['stalls']); ?></li>
+    </ul>
+    <form method="post" class="actions">
+        <button type="submit" name="buy" value="1" onclick="this.form.type.value='land'">Buy Land ($1000)</button>
+        <button type="submit" name="buy" value="1" onclick="this.form.type.value='attraction'">Buy Attraction ($500)</button>
+        <button type="submit" name="buy" value="1" onclick="this.form.type.value='stall'">Buy Food/Drink Stall ($200)</button>
+        <input type="hidden" name="type" value="">
+    </form>
+    <form method="post" class="override-form">
+        <label for="override_income_value">Force incoming revenue ($)</label>
+        <input type="number" step="0.01" name="override_income_value" id="override_income_value" value="<?php echo htmlspecialchars(number_format((float)$data['incoming_money'], 2, '.', '')); ?>">
+        <button type="submit">Apply Override</button>
+        <p class="account-note">This override bypasses validation and writes directly to the database.</p>
+    </form>
+</div>
+<script src="rat_scoreboard.js"></script>
+<?php include 'partials/score_event.php'; ?>
 </body>
 </html>
