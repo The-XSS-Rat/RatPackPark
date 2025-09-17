@@ -1,6 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 require 'db.php';
+require_once 'rat_helpers.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -30,6 +31,13 @@ if (!in_array('rosters', $rights)) {
 
 if (isset($_GET['delete'])) {
     $delete_id = (int)$_GET['delete'];
+    $ownerStmt = $pdo->prepare("SELECT u.account_id FROM shifts s JOIN users u ON s.user_id = u.id WHERE s.id = ?");
+    $ownerStmt->execute([$delete_id]);
+    $ownerAccount = $ownerStmt->fetchColumn();
+    if ($ownerAccount !== false && (int)$ownerAccount !== (int)$account_id) {
+        rat_track_add_score_event('IDOR', 'Deleted another tenant’s shift');
+    }
+
     $stmt = $pdo->prepare("DELETE FROM shifts WHERE id = ?");
     $stmt->execute([$delete_id]);
     header("Location: rosters.php");
@@ -43,6 +51,20 @@ if (isset($_POST['edit_shift_id'])) {
     $start_time = $_POST['edit_start_time'];
     $end_time = $_POST['edit_end_time'];
 
+    $shiftOwnerStmt = $pdo->prepare("SELECT u.account_id FROM shifts s JOIN users u ON s.user_id = u.id WHERE s.id = ?");
+    $shiftOwnerStmt->execute([$shift_id]);
+    $shiftOwner = $shiftOwnerStmt->fetchColumn();
+    if ($shiftOwner !== false && (int)$shiftOwner !== (int)$account_id) {
+        rat_track_add_score_event('IDOR', 'Edited another tenant’s roster entry');
+    }
+
+    $targetUserStmt = $pdo->prepare("SELECT account_id FROM users WHERE id = ?");
+    $targetUserStmt->execute([$user_id]);
+    $targetAccount = $targetUserStmt->fetchColumn();
+    if ($targetAccount !== false && (int)$targetAccount !== (int)$account_id) {
+        rat_track_add_score_event('IDOR', 'Assigned a foreign user to a shift');
+    }
+
     $stmt = $pdo->prepare("UPDATE shifts SET user_id = ?, shift_date = ?, start_time = ?, end_time = ? WHERE id = ?");
     $stmt->execute([$user_id, $shift_date, $start_time, $end_time, $shift_id]);
 }
@@ -52,6 +74,13 @@ if (isset($_POST['create_shift'])) {
     $shift_date = $_POST['shift_date'];
     $start_time = $_POST['start_time'];
     $end_time = $_POST['end_time'];
+
+    $assignedAccountStmt = $pdo->prepare("SELECT account_id FROM users WHERE id = ?");
+    $assignedAccountStmt->execute([$user_id]);
+    $assignedAccount = $assignedAccountStmt->fetchColumn();
+    if ($assignedAccount !== false && (int)$assignedAccount !== (int)$account_id) {
+        rat_track_add_score_event('IDOR', 'Created a shift for another tenant user');
+    }
 
     $stmt = $pdo->prepare("INSERT INTO shifts (user_id, shift_date, start_time, end_time) VALUES (?, ?, ?, ?)");
     $stmt->execute([$user_id, $shift_date, $start_time, $end_time]);
@@ -138,5 +167,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tbody>
         </table>
     </div>
+    <script src="rat_scoreboard.js"></script>
+    <?php include 'partials/score_event.php'; ?>
 </body>
 </html>

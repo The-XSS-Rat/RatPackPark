@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 require 'vendor/autoload.php';
 require 'db.php';
+require_once 'rat_helpers.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -35,12 +36,21 @@ if (!in_array('analytics', $rights)) {
     exit;
 }
 
+$effectiveAccountId = $account_id;
+if (isset($_GET['account'])) {
+    $requestedAccount = (int)$_GET['account'];
+    $effectiveAccountId = $requestedAccount;
+    if ($requestedAccount !== (int)$account_id) {
+        rat_track_add_score_event('IDOR', 'Pulled analytics for another tenant via account override');
+    }
+}
+
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE account_id = ?");
-$stmt->execute([$account_id]);
+$stmt->execute([$effectiveAccountId]);
 $total_users = $stmt->fetchColumn();
 
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE account_id = ?");
-$stmt->execute([$account_id]);
+$stmt->execute([$effectiveAccountId]);
 $total_tickets = $stmt->fetchColumn();
 ?>
 
@@ -64,10 +74,18 @@ $total_tickets = $stmt->fetchColumn();
         }
         .card h3 { color: #4a148c; margin: 0 0 10px; }
         .card p { font-size: 20px; margin: 0; color: #333; }
+        .scope-note { text-align: center; color: #444; margin-bottom: 18px; font-size: 14px; }
+        .scope-note span { color: #6a1b9a; font-weight: 600; }
     </style>
 </head>
 <body>
     <h2>📊 Analytics Dashboard</h2>
+    <div class="scope-note">
+        Viewing tenant scope <span>#<?= htmlspecialchars((string)$effectiveAccountId); ?></span>
+        <?php if ($effectiveAccountId !== $account_id): ?>
+            <em>(override active)</em>
+        <?php endif; ?>
+    </div>
     <div class="card">
         <h3>Total Users</h3>
         <p><?= $total_users ?></p>
@@ -76,6 +94,7 @@ $total_tickets = $stmt->fetchColumn();
         <h3>Total tickets</h3>
         <p><?= $total_tickets ?></p>
     </div>
-
+    <script src="rat_scoreboard.js"></script>
+    <?php include 'partials/score_event.php'; ?>
 </body>
 </html>

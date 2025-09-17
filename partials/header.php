@@ -11,6 +11,20 @@
             margin: 0;
             padding: 0;
         }
+        .global-banner {
+            background: rgba(74, 20, 140, 0.9);
+            color: #fff;
+            padding: 8px 16px;
+            text-align: right;
+        }
+        .global-banner a {
+            color: #ffeb3b;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .global-banner a:hover {
+            text-decoration: underline;
+        }
         .form-container {
             background-color: #ffffffdd;
             padding: 2em;
@@ -40,4 +54,7 @@
     </style>
 </head>
 <body>
+<div class="global-banner">
+    <a href="https://www.youtube.com/playlist?list=PLd92v1QxPOprxnqslA9ho9egWvs4_3gDQ" target="_blank" rel="noopener noreferrer">Solutions</a>
+</div>
 <!-- 'your-secret-key' should be replaced with your actual JWT secret key -->

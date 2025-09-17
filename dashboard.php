@@ -61,6 +61,17 @@ try {
             background: #4a148c;
             color: white;
             padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .topbar a {
+            color: #ffeb3b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .topbar a:hover {
+            text-decoration: underline;
         }
         iframe {
             flex: 1;
@@ -76,9 +87,12 @@ try {
     </div>
     <div class="main">
         <div class="topbar">
-            Logged in as <strong><?php echo htmlspecialchars($username); ?></strong> | Role ID: <?php echo $role_id; ?>
+            <span>Logged in as <strong><?php echo htmlspecialchars($username); ?></strong> | Role ID: <?php echo $role_id; ?></span>
+            <a href="https://www.youtube.com/playlist?list=PLd92v1QxPOprxnqslA9ho9egWvs4_3gDQ" target="_blank" rel="noopener noreferrer">Solutions</a>
         </div>
         <iframe name="mainframe" src="welcome.php"></iframe>
     </div>
+    <script src="rat_scoreboard.js"></script>
+    <?php include 'partials/score_event.php'; ?>
 </body>
 </html>

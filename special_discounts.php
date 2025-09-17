@@ -1,6 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 require 'db.php';
+require_once 'rat_helpers.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -34,6 +35,13 @@ if (isset($_POST['create_discount'])) {
     $percent = (float)($_POST['discount_percent'] ?? 0);
 
     if ($ticket_id && $start && $end && $percent) {
+        $ticketOwnerStmt = $pdo->prepare("SELECT account_id FROM tickets WHERE id = ?");
+        $ticketOwnerStmt->execute([$ticket_id]);
+        $ticketOwner = $ticketOwnerStmt->fetchColumn();
+        if ($ticketOwner !== false && (int)$ticketOwner !== (int)$account_id) {
+            rat_track_add_score_event('IDOR', 'Created a discount for another tenant’s ticket');
+        }
+
         $stmt = $pdo->prepare("INSERT INTO ticket_discounts (ticket_id, start_datetime, end_datetime, discount_percent) VALUES (?, ?, ?, ?)");
         $stmt->execute([$ticket_id, $start, $end, $percent]);
     } else {
@@ -43,6 +51,13 @@ if (isset($_POST['create_discount'])) {
 
 if (isset($_GET['delete'])) {
     $delete_id = (int)$_GET['delete'];
+    $discountOwnerStmt = $pdo->prepare("SELECT t.account_id FROM ticket_discounts td JOIN tickets t ON td.ticket_id = t.id WHERE td.id = ?");
+    $discountOwnerStmt->execute([$delete_id]);
+    $discountOwner = $discountOwnerStmt->fetchColumn();
+    if ($discountOwner !== false && (int)$discountOwner !== (int)$account_id) {
+        rat_track_add_score_event('IDOR', 'Deleted another tenant’s discount');
+    }
+
     $stmt = $pdo->prepare("DELETE FROM ticket_discounts WHERE id = ?");
     $stmt->execute([$delete_id]);
     header("Location: special_discounts.php");
@@ -110,5 +125,7 @@ $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </tbody>
     </table>
+    <script src="rat_scoreboard.js"></script>
+    <?php include 'partials/score_event.php'; ?>
 </body>
 </html>

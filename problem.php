@@ -1,6 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 require 'db.php';
+require_once 'rat_helpers.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -46,6 +47,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->prepare("SELECT id, category, description, status, submitted_at FROM problem_reports WHERE submitted_by = ? ORDER BY submitted_at DESC");
 $stmt->execute([$submitted_by]);
 $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$viewed_report = null;
+$view_notes = [];
+$view_missing = false;
+if (isset($_GET['view'])) {
+    $view_id = (int)$_GET['view'];
+    if ($view_id > 0) {
+        $viewStmt = $pdo->prepare("SELECT pr.*, u.username FROM problem_reports pr LEFT JOIN users u ON pr.submitted_by = u.id WHERE pr.id = ?");
+        $viewStmt->execute([$view_id]);
+        $viewed_report = $viewStmt->fetch(PDO::FETCH_ASSOC);
+        if ($viewed_report) {
+            if ((int)$viewed_report['account_id'] !== (int)$account_id) {
+                rat_track_add_score_event('IDOR', 'Peeked at another tenant’s incident report');
+            }
+            $notesStmt = $pdo->prepare("SELECT pn.note, pn.created_at, au.username FROM problem_notes pn LEFT JOIN users au ON pn.author_id = au.id WHERE pn.problem_id = ? ORDER BY pn.created_at ASC");
+            $notesStmt->execute([$view_id]);
+            $view_notes = $notesStmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $view_missing = true;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -64,6 +87,12 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
         table { width: 100%; margin-top: 20px; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
         th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
         th { background: #6a1b9a; color: white; }
+        .view-card { margin-top: 20px; background: #ede7f6; padding: 18px; border-radius: 12px; }
+        .view-card h3 { margin-top: 0; color: #4a148c; }
+        .view-card ul { list-style: none; padding: 0; margin: 0 0 10px; }
+        .view-card li { margin: 6px 0; }
+        .note-list { list-style: disc; padding-left: 20px; color: #333; }
+        .note-empty { color: #555; }
     </style>
 </head>
 <body>
@@ -92,6 +121,33 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <button type="submit">Submit Report</button>
         </form>
 
+        <?php if ($viewed_report): ?>
+            <div class="view-card">
+                <h3>🔎 Incident Peek: <?= htmlspecialchars($viewed_report['category']) ?> (ID #<?= htmlspecialchars($viewed_report['id']) ?>)</h3>
+                <ul>
+                    <li><strong>Tenant:</strong> <?= htmlspecialchars((string)$viewed_report['account_id']) ?></li>
+                    <li><strong>Submitted By:</strong> <?= htmlspecialchars($viewed_report['username'] ?? 'Unknown'); ?></li>
+                    <li><strong>Status:</strong> <?= htmlspecialchars($viewed_report['status']); ?></li>
+                    <?php if (!empty($viewed_report['attachment_url'])): ?>
+                        <li><strong>Attachment:</strong> <a href="<?= htmlspecialchars($viewed_report['attachment_url']); ?>" target="_blank" rel="noopener noreferrer">Open</a></li>
+                    <?php endif; ?>
+                </ul>
+                <p><?= nl2br(htmlspecialchars($viewed_report['description'])); ?></p>
+                <?php if (!empty($view_notes)): ?>
+                    <h4>Maintenance Notes</h4>
+                    <ul class="note-list">
+                        <?php foreach ($view_notes as $note): ?>
+                            <li><strong><?= htmlspecialchars($note['username'] ?? 'Unknown') ?>:</strong> <?= htmlspecialchars($note['note']); ?> <em>(<?= htmlspecialchars($note['created_at']); ?>)</em></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p class="note-empty">No remediation notes recorded for this issue.</p>
+                <?php endif; ?>
+            </div>
+        <?php elseif ($view_missing): ?>
+            <p class="error">That incident could not be found.</p>
+        <?php endif; ?>
+
         <h3>📃 My Submitted Reports</h3>
         <table>
             <thead>
@@ -118,5 +174,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tbody>
         </table>
     </div>
+    <script src="rat_scoreboard.js"></script>
+    <?php include 'partials/score_event.php'; ?>
 </body>
 </html>
