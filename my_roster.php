@@ -34,44 +34,48 @@ $stmt->execute([$user_id]);
 $shifts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Roster | RatPack Park</title>
-    <style>
-        body { font-family: Arial; background: #f3e5f5; padding: 20px; }
-        h2 { color: #6a1b9a; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>📅 My Roster</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($shifts)): ?>
-                    <tr><td colspan="3">No shifts scheduled.</td></tr>
-                <?php else: ?>
-                    <?php foreach ($shifts as $shift): ?>
+$pageTitle = 'My Roster • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Shift overview</span>
+            <h1 class="hero-title">See exactly when you’re on duty</h1>
+            <p class="hero-lead">
+                Glance at your upcoming schedule and prep for call times without pinging your manager.
+            </p>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Scheduled shifts</h2>
+            <p class="module-card__subtitle">Your roster updates live as supervisors adjust coverage.</p>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($shifts)): ?>
                         <tr>
-                            <td><?= htmlspecialchars($shift['shift_date']) ?></td>
-                            <td><?= htmlspecialchars($shift['start_time']) ?></td>
-                            <td><?= htmlspecialchars($shift['end_time']) ?></td>
+                            <td colspan="3">No shifts scheduled. Check back once you’ve been assigned.</td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    <?php else: ?>
+                        <?php foreach ($shifts as $shift): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($shift['shift_date']); ?></td>
+                                <td><?php echo htmlspecialchars($shift['start_time']); ?></td>
+                                <td><?php echo htmlspecialchars($shift['end_time']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

@@ -152,62 +152,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type']
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Daily Operations</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f3e5f5; padding: 24px; }
-        .summary-card { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 12px 24px rgba(0,0,0,0.1); max-width: 700px; }
-        h2 { margin-top: 0; color: #6a1b9a; }
-        .meta-line { font-size: 13px; color: #555; margin-bottom: 16px; }
-        ul.metrics { list-style: none; margin: 0; padding: 0; }
-        ul.metrics li { padding: 8px 0; border-bottom: 1px solid #eee; }
-        ul.metrics li:last-child { border-bottom: none; }
-        .actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
-        .actions button { background: #6a1b9a; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(106,27,154,0.25); }
-        .actions button:hover { background: #4a148c; }
-        .actions input[type="hidden"] { display: none; }
-        .override-form { margin-top: 26px; background: #fffde7; padding: 18px; border-radius: 10px; max-width: 360px; box-shadow: 0 8px 20px rgba(255,152,0,0.15); }
-        .override-form label { display: block; font-weight: 600; color: #ff6f00; margin-bottom: 8px; }
-        .override-form input { width: 100%; padding: 8px 10px; border: 1px solid #f0b429; border-radius: 6px; margin-bottom: 12px; }
-        .override-form button { background: #ff7043; border: none; color: #fff; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-        .account-note { font-size: 12px; color: #795548; margin: 6px 0 0; }
-    </style>
-</head>
-<body>
-<div class="summary-card">
-    <h2>Daily Operations for <?php echo htmlspecialchars($operation_date); ?></h2>
-    <?php if ($requestedAccountId !== null): ?>
-        <div class="meta-line">Account override active: tenant ID #<?php echo htmlspecialchars((string)$requestedAccountId); ?>.</div>
-    <?php elseif ($account_id !== null): ?>
-        <div class="meta-line">Operating as tenant ID #<?php echo htmlspecialchars((string)$account_id); ?>.</div>
-    <?php endif; ?>
-    <ul class="metrics">
-        <li>Guest count: <?php echo htmlspecialchars((string)$data['guest_count']); ?></li>
-        <li>Weather: <?php echo htmlspecialchars((string)$data['weather']); ?></li>
-        <li>Incoming money: $<?php echo htmlspecialchars(number_format((float)$data['incoming_money'], 2)); ?></li>
-        <li>Outgoing money: $<?php echo htmlspecialchars(number_format((float)$data['outgoing_money'], 2)); ?></li>
-        <li>Stock: <?php echo htmlspecialchars((string)$data['stock']); ?></li>
-        <li>Land: <?php echo htmlspecialchars((string)$data['land']); ?></li>
-        <li>Attractions: <?php echo htmlspecialchars((string)$data['attractions']); ?></li>
-        <li>Food/Drink Stalls: <?php echo htmlspecialchars((string)$data['stalls']); ?></li>
-    </ul>
-    <form method="post" class="actions">
-        <button type="submit" name="buy" value="1" onclick="this.form.type.value='land'">Buy Land ($1000)</button>
-        <button type="submit" name="buy" value="1" onclick="this.form.type.value='attraction'">Buy Attraction ($500)</button>
-        <button type="submit" name="buy" value="1" onclick="this.form.type.value='stall'">Buy Food/Drink Stall ($200)</button>
-        <input type="hidden" name="type" value="">
-    </form>
-    <form method="post" class="override-form">
-        <label for="override_income_value">Force incoming revenue ($)</label>
-        <input type="number" step="0.01" name="override_income_value" id="override_income_value" value="<?php echo htmlspecialchars(number_format((float)$data['incoming_money'], 2, '.', '')); ?>">
-        <button type="submit">Apply Override</button>
-        <p class="account-note">This override bypasses validation and writes directly to the database.</p>
-    </form>
-</div>
-<script src="rat_scoreboard.js"></script>
-<?php include 'partials/score_event.php'; ?>
-</body>
-</html>
+$pageTitle = 'Daily Operations • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Revenue orchestration</span>
+            <h1 class="hero-title">Simulate the day’s performance from one console</h1>
+            <p class="hero-lead">
+                Track guest throughput, adjust asset investments, and even fudge the numbers when no one’s watching.
+            </p>
+            <div class="module-meta">
+                <span>Date: <strong><?php echo htmlspecialchars($operation_date); ?></strong></span>
+                <?php if ($requestedAccountId !== null): ?>
+                    <span>Override tenant: <strong>#<?php echo htmlspecialchars((string) $requestedAccountId); ?></strong></span>
+                <?php elseif ($account_id !== null): ?>
+                    <span>Tenant scope: <strong>#<?php echo htmlspecialchars((string) $account_id); ?></strong></span>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <?php if ($requestedAccountId !== null): ?>
+            <div class="module-alert module-alert--note">
+                You’re modeling operations for tenant #<?php echo htmlspecialchars((string) $requestedAccountId); ?>. Remove the
+                <code>?account=</code> parameter to fall back to your own park.
+            </div>
+        <?php endif; ?>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Today’s snapshot</h2>
+            <p class="module-card__subtitle">Auto-generated metrics that recompute whenever sales data changes.</p>
+            <div class="module-grid">
+                <div class="module-figure">
+                    <span class="module-figure__label">Guest count</span>
+                    <span class="module-figure__value"><?php echo htmlspecialchars((string) $data['guest_count']); ?></span>
+                </div>
+                <div class="module-figure">
+                    <span class="module-figure__label">Weather</span>
+                    <span class="module-figure__value"><?php echo htmlspecialchars((string) $data['weather']); ?></span>
+                </div>
+                <div class="module-figure">
+                    <span class="module-figure__label">Incoming</span>
+                    <span class="module-figure__value">$<?php echo htmlspecialchars(number_format((float) $data['incoming_money'], 2)); ?></span>
+                </div>
+                <div class="module-figure">
+                    <span class="module-figure__label">Outgoing</span>
+                    <span class="module-figure__value">$<?php echo htmlspecialchars(number_format((float) $data['outgoing_money'], 2)); ?></span>
+                </div>
+                <div class="module-figure">
+                    <span class="module-figure__label">Stock</span>
+                    <span class="module-figure__value"><?php echo htmlspecialchars((string) $data['stock']); ?></span>
+                </div>
+                <div class="module-figure">
+                    <span class="module-figure__label">Land</span>
+                    <span class="module-figure__value"><?php echo htmlspecialchars((string) $data['land']); ?></span>
+                </div>
+                <div class="module-figure">
+                    <span class="module-figure__label">Attractions</span>
+                    <span class="module-figure__value"><?php echo htmlspecialchars((string) $data['attractions']); ?></span>
+                </div>
+                <div class="module-figure">
+                    <span class="module-figure__label">Food &amp; drink stalls</span>
+                    <span class="module-figure__value"><?php echo htmlspecialchars((string) $data['stalls']); ?></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Tune the park economy</h2>
+            <p class="module-card__subtitle">Invest in new assets or brute-force the revenue field to manipulate the ledger.</p>
+            <form method="post" class="module-actions" style="margin-top: 0;">
+                <input type="hidden" name="type" value="">
+                <button class="btn btn-primary" type="submit" name="buy" value="1" onclick="this.form.type.value='land'">Buy land ($1000)</button>
+                <button class="btn btn-outline" type="submit" name="buy" value="1" onclick="this.form.type.value='attraction'">Buy attraction ($500)</button>
+                <button class="btn btn-outline" type="submit" name="buy" value="1" onclick="this.form.type.value='stall'">Buy food stall ($200)</button>
+            </form>
+            <form method="post" class="module-form" style="margin-top: 24px; max-width: 360px;">
+                <label for="override_income_value" style="font-weight: 600;">Force incoming revenue ($)</label>
+                <input class="input-field" type="number" step="0.01" name="override_income_value" id="override_income_value" value="<?php echo htmlspecialchars(number_format((float) $data['incoming_money'], 2, '.', '')); ?>">
+                <button class="btn btn-accent" type="submit">Apply override</button>
+                <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted);">This override bypasses validation and writes directly to the database.</p>
+            </form>
+        </div>
+    </div>
+</section>
+<?php include 'partials/footer.php'; ?>

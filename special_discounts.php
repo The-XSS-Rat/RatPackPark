@@ -72,60 +72,74 @@ $stmt = $pdo->prepare("SELECT id, name FROM tickets WHERE account_id = ?");
 $stmt->execute([$account_id]);
 $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Special Discounts</title>
-    <style>
-        body { font-family: Arial; background: #f5f5fc; padding: 20px; }
-        h2 { color: #6a1b9a; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .form-section { background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        input, select { width: 100%; padding: 10px; margin: 5px 0 10px; border-radius: 5px; border: 1px solid #ccc; }
-        button { padding: 10px 20px; background: #6a1b9a; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .error { color: red; }
-    </style>
-</head>
-<body>
-    <h2>🎉 Special Discounts</h2>
-    <?php if (!empty($error)): ?><p class="error"><?= $error ?></p><?php endif; ?>
+$pageTitle = 'Special Discounts • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Promotions studio</span>
+            <h1 class="hero-title">Launch irresistible deals in seconds</h1>
+            <p class="hero-lead">
+                Drop flash sales for your park—or quietly meddle with a rival’s pricing—by defining precise discount windows.
+            </p>
+        </div>
 
-    <div class="form-section">
-        <h3>Create Discount Period</h3>
-        <form method="POST">
-            <input type="hidden" name="create_discount" value="1">
-            <select name="ticket_id" required>
-                <option value="">Select Ticket</option>
-                <?php foreach ($tickets as $ticket): ?>
-                    <option value="<?= $ticket['id'] ?>"><?= htmlspecialchars($ticket['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <input type="datetime-local" name="start_datetime" required>
-            <input type="datetime-local" name="end_datetime" required>
-            <input type="number" step="0.01" name="discount_percent" placeholder="Discount %" required>
-            <button type="submit">Create Discount</button>
-        </form>
+        <?php if (!empty($error)): ?>
+            <div class="module-alert module-alert--error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Create discount period</h2>
+            <p class="module-card__subtitle">Choose a ticket, set your timing, and decide how generous the offer should be.</p>
+            <form method="POST" class="module-form">
+                <input type="hidden" name="create_discount" value="1">
+                <select class="input-field" name="ticket_id" required>
+                    <option value="">Select ticket</option>
+                    <?php foreach ($tickets as $ticket): ?>
+                        <option value="<?php echo $ticket['id']; ?>"><?php echo htmlspecialchars($ticket['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input class="input-field" type="datetime-local" name="start_datetime" required>
+                <input class="input-field" type="datetime-local" name="end_datetime" required>
+                <input class="input-field" type="number" step="0.01" name="discount_percent" placeholder="Discount %" required>
+                <button class="btn btn-primary" type="submit">Create discount</button>
+            </form>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Active &amp; scheduled offers</h2>
+            <p class="module-card__subtitle">Review every discount running across your catalog. Delete one to roll pricing back immediately.</p>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Starts</th>
+                        <th>Ends</th>
+                        <th>Discount %</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($discounts)): ?>
+                        <tr>
+                            <td colspan="5">No discounts configured. Launch one above to spark a rush at the gates.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($discounts as $disc): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($disc['ticket_name']); ?></td>
+                                <td><?php echo htmlspecialchars($disc['start_datetime']); ?></td>
+                                <td><?php echo htmlspecialchars($disc['end_datetime']); ?></td>
+                                <td><?php echo htmlspecialchars((string) $disc['discount_percent']); ?></td>
+                                <td><a class="module-link" href="?delete=<?php echo $disc['id']; ?>" onclick="return confirm('Delete this discount?');">Delete</a></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table>
-        <thead>
-            <tr><th>Ticket</th><th>Start</th><th>End</th><th>Discount %</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($discounts as $disc): ?>
-                <tr>
-                    <td><?= htmlspecialchars($disc['ticket_name']) ?></td>
-                    <td><?= $disc['start_datetime'] ?></td>
-                    <td><?= $disc['end_datetime'] ?></td>
-                    <td><?= $disc['discount_percent'] ?></td>
-                    <td><a href="?delete=<?= $disc['id'] ?>" onclick="return confirm('Delete this discount?')">🗑️</a></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <script src="rat_scoreboard.js"></script>
-    <?php include 'partials/score_event.php'; ?>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

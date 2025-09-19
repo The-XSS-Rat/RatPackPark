@@ -95,79 +95,84 @@ $stmt->execute([$account_id]);
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Rosters | RatPack Park</title>
-    <style>
-        body { font-family: Arial; background: #f3e5f5; padding: 20px; }
-        h2 { color: #6a1b9a; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .shift-table-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
-        button { background: #6a1b9a; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
-        form.inline-form { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
-    </style>
-</head>
-<body>
-    <div class="shift-table-container">
-        <h2>👥 Staff Rosters</h2>
+$pageTitle = 'Staff Rosters • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Crew scheduling</span>
+            <h1 class="hero-title">Keep every shift covered with confidence</h1>
+            <p class="hero-lead">
+                Assign operators, adjust coverage, and respond to last-minute changes without leaving the dashboard. Rosters update
+                instantly for your entire tenant.
+            </p>
+        </div>
 
-        <h3>Create New Shift</h3>
-        <form method="POST">
-            <input type="hidden" name="create_shift" value="1">
-            <select name="user_id" required>
-                <?php foreach ($users as $u): ?>
-                    <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['username']) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <input type="date" name="shift_date" required>
-            <input type="time" name="start_time" required>
-            <input type="time" name="end_time" required>
-            <button type="submit">Create</button>
-        </form>
+        <div class="module-card">
+            <h2 class="module-card__title">Create new shift</h2>
+            <p class="module-card__subtitle">Set the crew, date, and time window to keep attractions staffed.</p>
+            <form method="POST" class="module-form">
+                <input type="hidden" name="create_shift" value="1">
+                <select class="input-field" name="user_id" required>
+                    <?php foreach ($users as $u): ?>
+                        <option value="<?php echo $u['id']; ?>"><?php echo htmlspecialchars($u['username']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input class="input-field" type="date" name="shift_date" required>
+                <input class="input-field" type="time" name="start_time" required>
+                <input class="input-field" type="time" name="end_time" required>
+                <button class="btn btn-primary" type="submit">Create shift</button>
+            </form>
+        </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Shift Date</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($shifts as $shift): ?>
+        <div class="module-card">
+            <h2 class="module-card__title">Upcoming coverage</h2>
+            <p class="module-card__subtitle">Edit on the fly or remove assignments as your staffing picture changes.</p>
+            <table class="module-table">
+                <thead>
                     <tr>
-                        <td><?= htmlspecialchars($shift['username']) ?></td>
-                        <td><?= htmlspecialchars($shift['shift_date']) ?></td>
-                        <td><?= htmlspecialchars($shift['start_time']) ?></td>
-                        <td><?= htmlspecialchars($shift['end_time']) ?></td>
-                        <td>
-                            <form method="POST" class="inline-form">
-                                <input type="hidden" name="edit_shift_id" value="<?= $shift['id'] ?>">
-                                <select name="edit_user_id">
-                                    <?php foreach ($users as $u): ?>
-                                        <option value="<?= $u['id'] ?>" <?= $u['id'] == $shift['user_id'] ? 'selected' : '' ?>><?= htmlspecialchars($u['username']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <input type="date" name="edit_shift_date" value="<?= $shift['shift_date'] ?>">
-                                <input type="time" name="edit_start_time" value="<?= $shift['start_time'] ?>">
-                                <input type="time" name="edit_end_time" value="<?= $shift['end_time'] ?>">
-                                <button type="submit">Update</button>
-                                <a href="?delete=<?= $shift['id'] ?>" onclick="return confirm('Delete this shift?')">🗑️</a>
-                            </form>
-                        </td>
+                        <th>Team member</th>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Actions</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php if (empty($shifts)): ?>
+                        <tr>
+                            <td colspan="5">No shifts scheduled yet. Create one above to get today’s roster rolling.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($shifts as $shift): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($shift['username']); ?></td>
+                                <td><?php echo htmlspecialchars($shift['shift_date']); ?></td>
+                                <td><?php echo htmlspecialchars($shift['start_time']); ?></td>
+                                <td><?php echo htmlspecialchars($shift['end_time']); ?></td>
+                                <td>
+                                    <form method="POST" class="module-form module-form--inline">
+                                        <input type="hidden" name="edit_shift_id" value="<?php echo $shift['id']; ?>">
+                                        <select class="input-field" name="edit_user_id">
+                                            <?php foreach ($users as $u): ?>
+                                                <option value="<?php echo $u['id']; ?>" <?php echo $u['id'] == $shift['user_id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($u['username']); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <input class="input-field" type="date" name="edit_shift_date" value="<?php echo $shift['shift_date']; ?>">
+                                        <input class="input-field" type="time" name="edit_start_time" value="<?php echo $shift['start_time']; ?>">
+                                        <input class="input-field" type="time" name="edit_end_time" value="<?php echo $shift['end_time']; ?>">
+                                        <button class="btn btn-outline" type="submit">Update</button>
+                                        <a class="module-link" href="?delete=<?php echo $shift['id']; ?>" onclick="return confirm('Delete this shift?');">Delete</a>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <script src="rat_scoreboard.js"></script>
-    <?php include 'partials/score_event.php'; ?>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

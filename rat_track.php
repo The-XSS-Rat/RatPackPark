@@ -134,101 +134,52 @@ $vulnerabilities = [
     ],
 ];
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Rat Track | RatPack Park</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f3e5f5;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #6a1b9a;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        thead {
-            background: #6a1b9a;
-            color: #fff;
-        }
-        th, td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: top;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tbody tr:nth-child(even) {
-            background: #f8f5fc;
-        }
-        a.endpoint-link {
-            color: #4a148c;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        a.endpoint-link:hover {
-            text-decoration: underline;
-        }
-        .category-tag {
-            display: inline-block;
-            background: #ede7f6;
-            color: #4a148c;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            margin: 2px 4px 2px 0;
-        }
-        .notes {
-            font-size: 14px;
-            color: #444;
-            line-height: 1.5;
-        }
-    </style>
-</head>
-<body>
-    <h1>Rat Track</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Category</th>
-                <th>Endpoint</th>
-                <th>Issue</th>
-                <th>Details &amp; Exploitation</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($vulnerabilities as $entry): ?>
-                <tr>
-                    <td>
-                        <?php foreach (explode(',', $entry['category']) as $tag): ?>
-                            <span class="category-tag"><?php echo htmlspecialchars(trim($tag)); ?></span>
-                        <?php endforeach; ?>
-                    </td>
-                    <td>
-                        <a class="endpoint-link" href="<?php echo htmlspecialchars($entry['endpoint']); ?>" target="mainframe"><?php echo htmlspecialchars($entry['endpoint']); ?></a>
-                    </td>
-                    <td><?php echo htmlspecialchars($entry['title']); ?></td>
-                    <td class="notes">
-                        <div><?php echo $entry['details']; ?></div>
-                        <div><strong>How to exploit:</strong> <?php echo $entry['exploit']; ?></div>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <script src="rat_scoreboard.js"></script>
-    <?php include 'partials/score_event.php'; ?>
-</body>
-</html>
+$pageTitle = 'Rat Track • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Vulnerability radar</span>
+            <h1 class="hero-title">Documented weaknesses hiding in plain sight</h1>
+            <p class="hero-lead">
+                Every issue we’ve shipped for the lab—complete with exploitation notes—lives here for quick reference.
+            </p>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Known issues</h2>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Endpoint</th>
+                        <th>Issue</th>
+                        <th>Details &amp; exploitation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($vulnerabilities as $entry): ?>
+                        <tr>
+                            <td>
+                                <?php foreach (explode(',', $entry['category']) as $tag): ?>
+                                    <span class="module-pill"><?php echo htmlspecialchars(trim($tag)); ?></span>
+                                <?php endforeach; ?>
+                            </td>
+                            <td>
+                                <a class="module-link" href="<?php echo htmlspecialchars($entry['endpoint']); ?>" target="mainframe"><?php echo htmlspecialchars($entry['endpoint']); ?></a>
+                            </td>
+                            <td><?php echo htmlspecialchars($entry['title']); ?></td>
+                            <td>
+                                <div><?php echo $entry['details']; ?></div>
+                                <div style="margin-top: 6px;"><strong>How to exploit:</strong> <?php echo $entry['exploit']; ?></div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+<?php include 'partials/footer.php'; ?>

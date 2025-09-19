@@ -19,7 +19,7 @@ $menu_items = [
 
 foreach ($menu_items as $item) {
     if (!empty(array_intersect($rights, $item['rights']))) {
-        echo "<a href=\"{$item['url']}\" target=\"mainframe\">{$item['label']}</a>";
+        echo "<a class=\"module-menu__link\" href=\"{$item['url']}\" target=\"mainframe\">{$item['label']}<span aria-hidden=\"true\">→</span></a>";
     }
 }
 ?>

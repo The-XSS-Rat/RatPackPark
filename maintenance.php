@@ -26,25 +26,29 @@ if (!in_array('maintenance', $rights)) {
     exit;
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Maintenance | RatPack Park</title>
-    <style>
-        body { font-family: Arial; background: #f5f5fc; padding: 20px; }
-        h2 { color: #6a1b9a; }
-        ul { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        li { margin: 8px 0; }
-    </style>
-    </head>
-<body>
-    <h2>🛠️ Maintenance Tasks</h2>
-    <ul>
-        <li>Check roller coaster brakes</li>
-        <li>Inspect water slides</li>
-        <li>Test safety harnesses</li>
-    </ul>
-</body>
-</html>
+$pageTitle = 'Maintenance • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Ride readiness</span>
+            <h1 class="hero-title">Keep attractions safe and spectacular</h1>
+            <p class="hero-lead">
+                Work through the essentials before gates open—these checks keep thrill-seekers smiling.
+            </p>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Today’s checklist</h2>
+            <ul class="module-list">
+                <li class="module-list__item">Check roller coaster brakes</li>
+                <li class="module-list__item">Inspect water slides</li>
+                <li class="module-list__item">Test safety harnesses</li>
+            </ul>
+        </div>
+    </div>
+</section>
+<?php include 'partials/footer.php'; ?>
 

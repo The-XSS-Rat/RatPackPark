@@ -77,75 +77,89 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Management</title>
-    <style>
-        body { font-family: Arial; padding: 20px; background: #f5f5fc; }
-        h2 { color: #6a1b9a; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .form-section { background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        input, select { width: 100%; padding: 10px; margin: 5px 0 10px; border-radius: 5px; border: 1px solid #ccc; }
-        button { padding: 10px 20px; background: #6a1b9a; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .message { color: green; }
-        .error { color: red; }
-        .inline-form { display: flex; gap: 8px; align-items: center; }
-        .inline-form select { flex: 1; }
-    </style>
-</head>
-<body>
-    <h2>👥 User Management</h2>
+$pageTitle = 'User Management • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Crew directory</span>
+            <h1 class="hero-title">Invite, elevate, and prune your park staff</h1>
+            <p class="hero-lead">
+                Control access across attractions and departments by creating new users and shifting their roles on the fly.
+            </p>
+        </div>
 
-    <?php if (!empty($error)): ?><p class="error"><?= $error ?></p><?php endif; ?>
-    <?php if (!empty($success)): ?><p class="message"><?= $success ?></p><?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="module-alert module-alert--error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($success)): ?>
+            <div class="module-alert module-alert--success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
 
-    <div class="form-section">
-        <h3>Create New User</h3>
-        <form method="POST">
-            <input type="hidden" name="create_user" value="1">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <select name="role_id" required>
-                <?php foreach ($roles as $id => $label): ?>
-                    <?php if ($id !== 1): ?>
-                        <option value="<?= $id ?>"><?= $label ?></option>
+        <div class="module-card">
+            <h2 class="module-card__title">Create new user</h2>
+            <p class="module-card__subtitle">Spin up a fresh account and grant the right level of control.</p>
+            <form method="POST" class="module-form">
+                <input type="hidden" name="create_user" value="1">
+                <input class="input-field" type="text" name="username" placeholder="Username" required>
+                <input class="input-field" type="email" name="email" placeholder="Email" required>
+                <input class="input-field" type="password" name="password" placeholder="Password" required>
+                <select class="input-field" name="role_id" required>
+                    <?php foreach ($roles as $id => $label): ?>
+                        <?php if ($id !== 1): ?>
+                            <option value="<?php echo $id; ?>"><?php echo htmlspecialchars($label); ?></option>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+                <button class="btn btn-primary" type="submit">Create user</button>
+            </form>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Existing staff</h2>
+            <p class="module-card__subtitle">Adjust roles or remove accounts that no longer need access.</p>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($users)): ?>
+                        <tr>
+                            <td colspan="5">No users found for this tenant.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                <td><?php echo htmlspecialchars($roles[$user['role_id']] ?? 'Unknown'); ?></td>
+                                <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                                <td>
+                                    <form class="module-form module-form--inline" method="POST">
+                                        <input type="hidden" name="edit_user_id" value="<?php echo $user['id']; ?>">
+                                        <select class="input-field" name="edit_role_id">
+                                            <?php foreach ($roles as $id => $label): ?>
+                                                <option value="<?php echo $id; ?>" <?php echo $id == $user['role_id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <button class="btn btn-outline" type="submit">Update</button>
+                                        <a class="module-link" href="?delete=<?php echo $user['id']; ?>" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
-                <?php endforeach; ?>
-            </select>
-            <button type="submit">Create User</button>
-        </form>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table>
-        <thead>
-            <tr><th>Username</th><th>Email</th><th>Role</th><th>Created At</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($users as $user): ?>
-                <tr>
-                    <td><?= htmlspecialchars($user['username']) ?></td>
-                    <td><?= htmlspecialchars($user['email']) ?></td>
-                    <td><?= $roles[$user['role_id']] ?? 'Unknown' ?></td>
-                    <td><?= htmlspecialchars($user['created_at']) ?></td>
-                    <td>
-                        <form class="inline-form" method="POST" style="display:inline-block;">
-                            <input type="hidden" name="edit_user_id" value="<?= $user['id'] ?>">
-                            <select name="edit_role_id">
-                                <?php foreach ($roles as $id => $label): ?>
-                                    <option value="<?= $id ?>" <?= $id == $user['role_id'] ? 'selected' : '' ?>><?= $label ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button type="submit">Update</button>
-                        </form>
-                        <a href="?delete=<?= $user['id'] ?>" onclick="return confirm('Are you sure you want to delete this user?')">🗑️</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

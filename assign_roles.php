@@ -53,59 +53,73 @@ foreach ($roles as $r) {
     $role_map[$r['id']] = $r['name'];
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Assign Roles | RatPack Park</title>
-    <style>
-        body { font-family: Arial; background: #f5f5fc; padding: 20px; }
-        h2 { color: #6a1b9a; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .form-section { background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        select, button { padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; }
-        button { background: #6a1b9a; color: white; cursor: pointer; }
-        .message { color: green; }
-        .error { color: red; }
-    </style>
-</head>
-<body>
-    <h2>🎭 Assign Roles</h2>
-    <?php if (!empty($error)): ?><p class="error"><?= $error ?></p><?php endif; ?>
-    <?php if (!empty($success)): ?><p class="message"><?= $success ?></p><?php endif; ?>
+$pageTitle = 'Assign Roles • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Access control</span>
+            <h1 class="hero-title">Match teammates to the powers they need</h1>
+            <p class="hero-lead">
+                Promote a superstar, demote a troublemaker, or quietly align yourself with admin rights across any tenant.
+            </p>
+        </div>
 
-    <div class="form-section">
-        <form method="POST">
-            <select name="user_id" required>
-                <option value="" disabled selected>Select user</option>
-                <?php foreach ($users as $u): ?>
-                    <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['username']) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <select name="role_id" required>
-                <option value="" disabled selected>Select role</option>
-                <?php foreach ($roles as $r): ?>
-                    <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <button type="submit">Assign</button>
-        </form>
+        <?php if (!empty($error)): ?>
+            <div class="module-alert module-alert--error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($success)): ?>
+            <div class="module-alert module-alert--success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Assign a new role</h2>
+            <p class="module-card__subtitle">Pick a user and align them with the right level of access.</p>
+            <form method="POST" class="module-form">
+                <select class="input-field" name="user_id" required>
+                    <option value="" disabled selected>Select user</option>
+                    <?php foreach ($users as $u): ?>
+                        <option value="<?php echo $u['id']; ?>"><?php echo htmlspecialchars($u['username']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select class="input-field" name="role_id" required>
+                    <option value="" disabled selected>Select role</option>
+                    <?php foreach ($roles as $r): ?>
+                        <option value="<?php echo $r['id']; ?>"><?php echo htmlspecialchars($r['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button class="btn btn-primary" type="submit">Assign role</button>
+            </form>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Current roster</h2>
+            <p class="module-card__subtitle">Review the roles everyone already holds.</p>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Current role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($users)): ?>
+                        <tr>
+                            <td colspan="2">No users found.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($users as $u): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($u['username']); ?></td>
+                                <td><?php echo htmlspecialchars($role_map[$u['role_id']] ?? 'Unknown'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table>
-        <thead>
-            <tr><th>User</th><th>Current Role</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($users as $u): ?>
-                <tr>
-                    <td><?= htmlspecialchars($u['username']) ?></td>
-                    <td><?= htmlspecialchars($role_map[$u['role_id']] ?? 'Unknown') ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

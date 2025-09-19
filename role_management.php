@@ -50,51 +50,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->query("SELECT r.id, r.name, GROUP_CONCAT(rr.right_name ORDER BY rr.right_name SEPARATOR ', ') AS rights FROM roles r LEFT JOIN role_rights rr ON r.id = rr.role_id GROUP BY r.id, r.name ORDER BY r.id");
 $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Role Management | RatPack Park</title>
-    <style>
-        body { font-family: Arial; background: #f3e5f5; padding: 20px; }
-        h2 { color: #6a1b9a; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .form-section { background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        input, textarea { width: 100%; padding: 10px; margin: 5px 0 10px; border-radius: 5px; border: 1px solid #ccc; }
-        button { padding: 10px 20px; background: #6a1b9a; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .message { color: green; }
-        .error { color: red; }
-    </style>
-</head>
-<body>
-    <h2>🧩 Role Management</h2>
-    <?php if (!empty($error)): ?><p class="error"><?= $error ?></p><?php endif; ?>
-    <?php if (!empty($success)): ?><p class="message"><?= $success ?></p><?php endif; ?>
+$pageTitle = 'Role Management • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Permission architecture</span>
+            <h1 class="hero-title">Craft bespoke access stacks</h1>
+            <p class="hero-lead">
+                Define new roles and wire them up with rights that unlock every hidden corner of the platform.
+            </p>
+        </div>
 
-    <div class="form-section">
-        <h3>Create New Role</h3>
-        <form method="POST">
-            <input type="text" name="name" placeholder="Role name" required>
-            <textarea name="rights" placeholder="Comma-separated rights"></textarea>
-            <button type="submit">Create Role</button>
-        </form>
+        <?php if (!empty($error)): ?>
+            <div class="module-alert module-alert--error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($success)): ?>
+            <div class="module-alert module-alert--success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Create new role</h2>
+            <p class="module-card__subtitle">Name your role and list its rights as a comma-separated string.</p>
+            <form method="POST" class="module-form">
+                <input class="input-field" type="text" name="name" placeholder="Role name" required>
+                <textarea class="input-field" name="rights" placeholder="Comma-separated rights"></textarea>
+                <button class="btn btn-primary" type="submit">Create role</button>
+            </form>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Defined roles</h2>
+            <p class="module-card__subtitle">Inspect every role and the rights it grants.</p>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Rights</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($roles)): ?>
+                        <tr>
+                            <td colspan="3">No roles have been defined yet.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($roles as $role): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($role['id']); ?></td>
+                                <td><?php echo htmlspecialchars($role['name']); ?></td>
+                                <td><?php echo htmlspecialchars($role['rights'] ?? ''); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table>
-        <thead>
-            <tr><th>ID</th><th>Name</th><th>Rights</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($roles as $role): ?>
-                <tr>
-                    <td><?= htmlspecialchars($role['id']) ?></td>
-                    <td><?= htmlspecialchars($role['name']) ?></td>
-                    <td><?= htmlspecialchars($role['rights'] ?? '') ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

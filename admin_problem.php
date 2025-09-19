@@ -64,88 +64,96 @@ if (isset($_GET['notes'])) {
     }
 }
 ?>
+$pageTitle = 'Incident Command • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Operations response</span>
+            <h1 class="hero-title">Triage issues and steer the cleanup</h1>
+            <p class="hero-lead">
+                Review every report filed by crews, pivot into maintenance notes, and update statuses as remediation moves forward.
+            </p>
+        </div>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Problem Panel | RatPack Park</title>
-    <style>
-        body { font-family: Arial; background: #f3e5f5; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 10px; max-width: 900px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        h2 { color: #6a1b9a; text-align: center; }
-        .message { color: green; text-align: center; }
-        .error { color: #d32f2f; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.05); margin-top: 20px; }
-        th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; vertical-align: top; }
-        th { background: #6a1b9a; color: white; }
-        form.inline-form { display: flex; gap: 6px; align-items: center; }
-        select, button { padding: 6px; border-radius: 4px; border: 1px solid #999; }
-        .notes-card { margin-top: 20px; background: #e8eaf6; padding: 18px; border-radius: 12px; }
-        .notes-card h3 { margin-top: 0; color: #303f9f; }
-        .notes-card ul { list-style: disc; padding-left: 20px; color: #1a237e; }
-        .notes-card li { margin: 6px 0; }
-        .notes-empty { color: #555; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>📊 Admin Problem Management</h2>
-        <?php if (!empty($success)): ?><p class="message"><?= $success ?></p><?php endif; ?>
+        <?php if (!empty($success)): ?>
+            <div class="module-alert module-alert--success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
+
         <?php if ($notes_problem_meta): ?>
-            <div class="notes-card">
-                <h3>🗒️ Notes for Incident #<?= htmlspecialchars($notes_problem_meta['id']) ?> (Tenant <?= htmlspecialchars((string)$notes_problem_meta['account_id']); ?>)</h3>
-                <p><strong>Category:</strong> <?= htmlspecialchars($notes_problem_meta['category']); ?> | <strong>Status:</strong> <?= htmlspecialchars($notes_problem_meta['status']); ?></p>
-                <ul>
+            <div class="module-card">
+                <h2 class="module-card__title">Maintenance notebook</h2>
+                <p class="module-card__subtitle">Incident #<?php echo htmlspecialchars($notes_problem_meta['id']); ?> · Tenant #<?php echo htmlspecialchars((string) $notes_problem_meta['account_id']); ?></p>
+                <div class="module-meta">
+                    <span>Category: <strong><?php echo htmlspecialchars($notes_problem_meta['category']); ?></strong></span>
+                    <span>Status: <strong><?php echo htmlspecialchars($notes_problem_meta['status']); ?></strong></span>
+                </div>
+                <ul class="module-list">
                     <?php if (!empty($notes_for_problem)): ?>
                         <?php foreach ($notes_for_problem as $note): ?>
-                            <li><strong><?= htmlspecialchars($note['username'] ?? 'Unknown') ?>:</strong> <?= htmlspecialchars($note['note']); ?> <em>(<?= htmlspecialchars($note['created_at']); ?>)</em></li>
+                            <li class="module-list__item">
+                                <strong><?php echo htmlspecialchars($note['username'] ?? 'Unknown'); ?>:</strong>
+                                <?php echo htmlspecialchars($note['note']); ?>
+                                <em> · <?php echo htmlspecialchars($note['created_at']); ?></em>
+                            </li>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <li class="notes-empty">No notes recorded for this problem.</li>
+                        <li class="module-list__item">No notes recorded for this incident yet.</li>
                     <?php endif; ?>
                 </ul>
             </div>
         <?php elseif ($notes_missing): ?>
-            <p class="error">No problem record exists for that ID.</p>
+            <div class="module-alert module-alert--error">No problem record exists for that ID.</div>
         <?php endif; ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Submitted By</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Submitted At</th>
-                    <th>Update</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($reports as $report): ?>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Problem queue</h2>
+            <p class="module-card__subtitle">Advance cases, peek at foreign tenants, and keep the park spotless.</p>
+            <table class="module-table">
+                <thead>
                     <tr>
-                        <td><?= htmlspecialchars($report['username']) ?></td>
-                        <td><?= htmlspecialchars($report['category']) ?></td>
-                        <td><?= htmlspecialchars($report['description']) ?></td>
-                        <td><?= htmlspecialchars($report['status']) ?></td>
-                        <td><?= htmlspecialchars($report['submitted_at']) ?></td>
-                        <td>
-                            <form method="POST" class="inline-form">
-                                <input type="hidden" name="report_id" value="<?= $report['id'] ?>">
-                                <select name="new_status">
-                                    <option value="open" <?= $report['status'] == 'open' ? 'selected' : '' ?>>Open</option>
-                                    <option value="in_progress" <?= $report['status'] == 'in_progress' ? 'selected' : '' ?>>In Progress</option>
-                                    <option value="resolved" <?= $report['status'] == 'resolved' ? 'selected' : '' ?>>Resolved</option>
-                                    <option value="wont_resolve" <?= $report['status'] == 'wont_resolve' ? 'selected' : '' ?>>Won't Resolve</option>
-                                </select>
-                                <button type="submit">Update</button>
-                            </form>
-                        </td>
+                        <th>Submitted by</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Update</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php if (empty($reports)): ?>
+                        <tr>
+                            <td colspan="6">No incidents logged. Encourage teams to report issues from the field.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($reports as $report): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($report['username']); ?></td>
+                                <td><?php echo htmlspecialchars($report['category']); ?></td>
+                                <td><?php echo htmlspecialchars($report['description']); ?></td>
+                                <td><?php echo htmlspecialchars($report['status']); ?></td>
+                                <td><?php echo htmlspecialchars($report['submitted_at']); ?></td>
+                                <td>
+                                    <form method="POST" class="module-form module-form--inline">
+                                        <input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
+                                        <select class="input-field" name="new_status">
+                                            <option value="open" <?php echo $report['status'] == 'open' ? 'selected' : ''; ?>>Open</option>
+                                            <option value="in_progress" <?php echo $report['status'] == 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                                            <option value="resolved" <?php echo $report['status'] == 'resolved' ? 'selected' : ''; ?>>Resolved</option>
+                                            <option value="wont_resolve" <?php echo $report['status'] == 'wont_resolve' ? 'selected' : ''; ?>>Won't Resolve</option>
+                                        </select>
+                                        <button class="btn btn-outline" type="submit">Update</button>
+                                        <a class="module-link" href="?notes=<?php echo $report['id']; ?>">Notes</a>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <script src="rat_scoreboard.js"></script>
-    <?php include 'partials/score_event.php'; ?>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>
