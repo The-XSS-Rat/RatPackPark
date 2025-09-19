@@ -22,77 +22,43 @@ try {
     header('Location: login.php');
     exit;
 }
+
+$pageTitle = 'Operations Dashboard • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | RatPack Park</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .sidebar {
-            width: 200px;
-            background: #6a1b9a;
-            color: white;
-            padding: 20px;
-        }
-        .sidebar h3 {
-            margin-top: 0;
-        }
-        .sidebar a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            margin: 10px 0;
-        }
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .topbar {
-            background: #4a148c;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .topbar a {
-            color: #ffeb3b;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .topbar a:hover {
-            text-decoration: underline;
-        }
-        iframe {
-            flex: 1;
-            border: none;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <h3>Menu</h3>
-        <?php include 'menu.php'; ?>
-    </div>
-    <div class="main">
-        <div class="topbar">
-            <span>Logged in as <strong><?php echo htmlspecialchars($username); ?></strong> | Role ID: <?php echo $role_id; ?></span>
-            <a href="https://www.youtube.com/playlist?list=PLd92v1QxPOprxnqslA9ho9egWvs4_3gDQ" target="_blank" rel="noopener noreferrer">Solutions</a>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Operations cockpit</span>
+            <h1 class="hero-title">Command every corner of RatPack Park</h1>
+            <p class="hero-lead">
+                Launch scheduling, ticketing, analytics, and maintenance tools without leaving your control center. Everything you
+                need to keep the park humming lives here.
+            </p>
+            <div class="module-meta">
+                <span>Signed in as <strong><?php echo htmlspecialchars($username); ?></strong></span>
+                <span>Role ID <?php echo htmlspecialchars((string) $role_id); ?></span>
+            </div>
+            <div class="module-actions">
+                <a class="btn btn-primary" href="settings.php" target="mainframe">Open settings</a>
+                <a class="btn btn-outline" href="tickets.php" target="mainframe">Manage tickets</a>
+                <a class="btn btn-accent" href="logout.php">Sign out</a>
+            </div>
         </div>
-        <iframe name="mainframe" src="welcome.php"></iframe>
+        <div class="module-layout">
+            <aside class="module-menu">
+                <h2 class="module-menu__title">Control modules</h2>
+                <?php include 'menu.php'; ?>
+                <p class="module-menu__note">
+                    Pick a destination to load it in the operations stage. Modules inherit your current tenant context so you can
+                    switch between tasks without breaking flow.
+                </p>
+            </aside>
+            <div class="module-stage">
+                <iframe class="module-stage__frame" name="mainframe" src="welcome.php" title="Operations module workspace"></iframe>
+            </div>
+        </div>
     </div>
-    <script src="rat_scoreboard.js"></script>
-    <?php include 'partials/score_event.php'; ?>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

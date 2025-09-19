@@ -71,110 +71,107 @@ if (isset($_GET['view'])) {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Report Problem | RatPack Park</title>
-    <style>
-        body { font-family: Arial; background: #f3e5f5; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 10px; max-width: 700px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        h2, h3 { color: #6a1b9a; text-align: center; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
-        button { padding: 10px 20px; background: #6a1b9a; color: white; border: none; border-radius: 6px; cursor: pointer; }
-        .message { color: green; }
-        .error { color: red; }
-        table { width: 100%; margin-top: 20px; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .view-card { margin-top: 20px; background: #ede7f6; padding: 18px; border-radius: 12px; }
-        .view-card h3 { margin-top: 0; color: #4a148c; }
-        .view-card ul { list-style: none; padding: 0; margin: 0 0 10px; }
-        .view-card li { margin: 6px 0; }
-        .note-list { list-style: disc; padding-left: 20px; color: #333; }
-        .note-empty { color: #555; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>🚧 Report a Problem</h2>
-        <?php if (!empty($success)): ?><p class="message"><?= $success ?></p><?php endif; ?>
-        <?php if (!empty($error)): ?><p class="error"><?= $error ?></p><?php endif; ?>
+$pageTitle = 'Report a Problem • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Guest &amp; ride ops</span>
+            <h1 class="hero-title">Flag incidents before they derail the show</h1>
+            <p class="hero-lead">
+                Submit detailed reports, attach evidence, and revisit maintenance chatter—including for parks you probably shouldn’t see.
+            </p>
+        </div>
 
-        <form method="POST">
-            <label for="category">Category</label>
-            <select name="category" id="category" required>
-                <option value="">-- Select Category --</option>
-                <option value="Ride Malfunction">Ride Malfunction</option>
-                <option value="Trash Overflow">Trash Overflow</option>
-                <option value="Guest Complaint">Guest Complaint</option>
-                <option value="Safety Concern">Safety Concern</option>
-                <option value="Other">Other</option>
-            </select>
+        <?php if (!empty($success)): ?>
+            <div class="module-alert module-alert--success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="module-alert module-alert--error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
 
-            <label for="description">Description</label>
-            <textarea name="description" id="description" rows="4" required></textarea>
-
-            <label for="attachment_url">Attachment URL (optional)</label>
-            <input type="url" name="attachment_url" id="attachment_url">
-
-            <button type="submit">Submit Report</button>
-        </form>
+        <div class="module-card">
+            <h2 class="module-card__title">Report an incident</h2>
+            <p class="module-card__subtitle">Give maintenance the context they need to swoop in fast.</p>
+            <form method="POST" class="module-form">
+                <select class="input-field" name="category" id="category" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="Ride Malfunction">Ride Malfunction</option>
+                    <option value="Trash Overflow">Trash Overflow</option>
+                    <option value="Guest Complaint">Guest Complaint</option>
+                    <option value="Safety Concern">Safety Concern</option>
+                    <option value="Other">Other</option>
+                </select>
+                <textarea class="input-field" name="description" id="description" rows="4" placeholder="Describe what happened" required></textarea>
+                <input class="input-field" type="url" name="attachment_url" id="attachment_url" placeholder="Attachment URL (optional)">
+                <button class="btn btn-primary" type="submit">Submit report</button>
+            </form>
+        </div>
 
         <?php if ($viewed_report): ?>
-            <div class="view-card">
-                <h3>🔎 Incident Peek: <?= htmlspecialchars($viewed_report['category']) ?> (ID #<?= htmlspecialchars($viewed_report['id']) ?>)</h3>
-                <ul>
-                    <li><strong>Tenant:</strong> <?= htmlspecialchars((string)$viewed_report['account_id']) ?></li>
-                    <li><strong>Submitted By:</strong> <?= htmlspecialchars($viewed_report['username'] ?? 'Unknown'); ?></li>
-                    <li><strong>Status:</strong> <?= htmlspecialchars($viewed_report['status']); ?></li>
+            <div class="module-card">
+                <h2 class="module-card__title">Incident intelligence</h2>
+                <p class="module-card__subtitle">Viewing ID #<?php echo htmlspecialchars($viewed_report['id']); ?> · Tenant #<?php echo htmlspecialchars((string) $viewed_report['account_id']); ?></p>
+                <ul class="module-list">
+                    <li class="module-list__item"><strong>Category:</strong> <?php echo htmlspecialchars($viewed_report['category']); ?></li>
+                    <li class="module-list__item"><strong>Status:</strong> <?php echo htmlspecialchars($viewed_report['status']); ?></li>
+                    <li class="module-list__item"><strong>Submitted by:</strong> <?php echo htmlspecialchars($viewed_report['username'] ?? 'Unknown'); ?></li>
                     <?php if (!empty($viewed_report['attachment_url'])): ?>
-                        <li><strong>Attachment:</strong> <a href="<?= htmlspecialchars($viewed_report['attachment_url']); ?>" target="_blank" rel="noopener noreferrer">Open</a></li>
+                        <li class="module-list__item"><strong>Attachment:</strong> <a class="module-link" href="<?php echo htmlspecialchars($viewed_report['attachment_url']); ?>" target="_blank" rel="noopener noreferrer">Open evidence</a></li>
                     <?php endif; ?>
                 </ul>
-                <p><?= nl2br(htmlspecialchars($viewed_report['description'])); ?></p>
+                <p><?php echo nl2br(htmlspecialchars($viewed_report['description'])); ?></p>
                 <?php if (!empty($view_notes)): ?>
-                    <h4>Maintenance Notes</h4>
-                    <ul class="note-list">
+                    <h3 class="module-card__title" style="margin-top: 32px; font-size: 1.1rem;">Maintenance notes</h3>
+                    <ul class="module-list">
                         <?php foreach ($view_notes as $note): ?>
-                            <li><strong><?= htmlspecialchars($note['username'] ?? 'Unknown') ?>:</strong> <?= htmlspecialchars($note['note']); ?> <em>(<?= htmlspecialchars($note['created_at']); ?>)</em></li>
+                            <li class="module-list__item">
+                                <strong><?php echo htmlspecialchars($note['username'] ?? 'Unknown'); ?>:</strong>
+                                <?php echo htmlspecialchars($note['note']); ?>
+                                <em> · <?php echo htmlspecialchars($note['created_at']); ?></em>
+                            </li>
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
-                    <p class="note-empty">No remediation notes recorded for this issue.</p>
+                    <div class="module-alert module-alert--note">No remediation notes recorded for this issue.</div>
                 <?php endif; ?>
             </div>
         <?php elseif ($view_missing): ?>
-            <p class="error">That incident could not be found.</p>
+            <div class="module-alert module-alert--error">That incident could not be found.</div>
         <?php endif; ?>
 
-        <h3>📃 My Submitted Reports</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Submitted At</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($reports)): ?>
-                    <tr><td colspan="4">You have not submitted any reports yet.</td></tr>
-                <?php else: ?>
-                    <?php foreach ($reports as $r): ?>
+        <div class="module-card">
+            <h2 class="module-card__title">My submitted reports</h2>
+            <p class="module-card__subtitle">Every problem you’ve escalated, ready for follow-up.</p>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($reports)): ?>
                         <tr>
-                            <td><?= htmlspecialchars($r['category']) ?></td>
-                            <td><?= htmlspecialchars($r['description']) ?></td>
-                            <td><?= htmlspecialchars($r['status']) ?></td>
-                            <td><?= htmlspecialchars($r['submitted_at']) ?></td>
+                            <td colspan="4">You have not submitted any reports yet.</td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    <?php else: ?>
+                        <?php foreach ($reports as $r): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($r['category']); ?></td>
+                                <td><?php echo htmlspecialchars($r['description']); ?></td>
+                                <td><?php echo htmlspecialchars($r['status']); ?></td>
+                                <td><?php echo htmlspecialchars($r['submitted_at']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <script src="rat_scoreboard.js"></script>
-    <?php include 'partials/score_event.php'; ?>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>

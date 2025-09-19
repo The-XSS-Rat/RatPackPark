@@ -64,65 +64,77 @@ $stmt->execute([$account_id]);
 $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Ticket Type Management</title>
-    <style>
-        body { font-family: Arial; padding: 20px; background: #f5f5fc; }
-        h2 { color: #6a1b9a; text-align: center; }
-        table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-        th { background: #6a1b9a; color: white; }
-        .form-section { background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 10px; margin: 5px 0 10px; border-radius: 5px; border: 1px solid #ccc; }
-        button { padding: 10px 20px; background: #6a1b9a; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .message { color: green; }
-        .error { color: red; }
-        .inline-form { display: flex; gap: 8px; align-items: center; }
-        .inline-form input { flex: 1; }
-    </style>
-</head>
-<body>
-    <h2>🎟 Ticket Type Management</h2>
+$pageTitle = 'Ticket Type Management • RatPack Park';
+$activePage = 'dashboard';
+include 'partials/header.php';
+?>
+<section class="section section--module">
+    <div class="section__inner module-shell">
+        <div class="hero-card module-hero">
+            <span class="hero-badge">Catalog studio</span>
+            <h1 class="hero-title">Design ticket products that keep the turnstiles spinning</h1>
+            <p class="hero-lead">
+                Launch fresh passes, tweak pricing, and manage inventory for every park you can reach.
+            </p>
+        </div>
 
-    <?php if (!empty($error)): ?><p class="error"><?= $error ?></p><?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="module-alert module-alert--error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
 
-    <div class="form-section">
-        <h3>Create New Ticket Type</h3>
-        <form method="POST">
-            <input type="hidden" name="create_ticket_type" value="1">
-            <input type="text" name="name" placeholder="Ticket Name" required>
-            <input type="number" step="0.01" name="price" placeholder="Price" required>
-            <input type="number" name="available_quantity" placeholder="Available Quantity" required>
-            <button type="submit">Create Ticket</button>
-        </form>
+        <div class="module-card">
+            <h2 class="module-card__title">Create new ticket type</h2>
+            <p class="module-card__subtitle">Set the basics for a new pass, from price to available inventory.</p>
+            <form method="POST" class="module-form">
+                <input type="hidden" name="create_ticket_type" value="1">
+                <input class="input-field" type="text" name="name" placeholder="Ticket name" required>
+                <input class="input-field" type="number" step="0.01" name="price" placeholder="Price" required>
+                <input class="input-field" type="number" name="available_quantity" placeholder="Available quantity" required>
+                <button class="btn btn-primary" type="submit">Create ticket</button>
+            </form>
+        </div>
+
+        <div class="module-card">
+            <h2 class="module-card__title">Existing ticket types</h2>
+            <p class="module-card__subtitle">Edit live products or purge them completely.</p>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Available</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($tickets)): ?>
+                        <tr>
+                            <td colspan="5">No ticket types yet. Add one above to start selling.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($tickets as $ticket): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($ticket['name']); ?></td>
+                                <td>€<?php echo number_format($ticket['price'], 2); ?></td>
+                                <td><?php echo htmlspecialchars((string) $ticket['available_quantity']); ?></td>
+                                <td><?php echo htmlspecialchars($ticket['created_at']); ?></td>
+                                <td>
+                                    <form class="module-form module-form--inline" method="POST">
+                                        <input type="hidden" name="edit_ticket_type_id" value="<?php echo $ticket['id']; ?>">
+                                        <input class="input-field" type="text" name="edit_name" value="<?php echo htmlspecialchars($ticket['name']); ?>">
+                                        <input class="input-field" type="number" step="0.01" name="edit_price" value="<?php echo $ticket['price']; ?>">
+                                        <input class="input-field" type="number" name="edit_quantity" value="<?php echo $ticket['available_quantity']; ?>">
+                                        <button class="btn btn-outline" type="submit">Update</button>
+                                        <a class="module-link" href="?delete=<?php echo $ticket['id']; ?>" onclick="return confirm('Delete this ticket type?');">Delete</a>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table>
-        <thead>
-            <tr><th>Name</th><th>Price</th><th>Available Quantity</th><th>Created At</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($tickets as $ticket): ?>
-                <tr>
-                    <td><?= htmlspecialchars($ticket['name']) ?></td>
-                    <td><?= number_format($ticket['price'], 2) ?></td>
-                    <td><?= $ticket['available_quantity'] ?></td>
-                    <td><?= $ticket['created_at'] ?></td>
-                    <td>
-                        <form class="inline-form" method="POST">
-                            <input type="hidden" name="edit_ticket_type_id" value="<?= $ticket['id'] ?>">
-                            <input type="text" name="edit_name" value="<?= htmlspecialchars($ticket['name']) ?>">
-                            <input type="number" step="0.01" name="edit_price" value="<?= $ticket['price'] ?>">
-                            <input type="number" name="edit_quantity" value="<?= $ticket['available_quantity'] ?>">
-                            <button type="submit">Update</button>
-                        </form>
-                        <a href="?delete=<?= $ticket['id'] ?>" onclick="return confirm('Delete this ticket type?')">🗑️</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</body>
-</html>
+</section>
+<?php include 'partials/footer.php'; ?>
