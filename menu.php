@@ -13,7 +13,7 @@ $menu_items = [
     ['label' => 'Role Management', 'url' => 'role_management.php', 'rights' => ['roles_management']],
     ['label' => 'Assign Roles', 'url' => 'assign_roles.php', 'rights' => ['user_management']],
     ['label' => 'Daily Operations', 'url' => 'daily_operations.php', 'rights' => ['daily_operations']],
-    ['label' => 'Rat Track', 'url' => 'rat_track.php', 'rights' => ['logout']],
+    ['label' => '{{SPOILERS}} IDOR and BAC guide', 'url' => 'rat_track.php', 'rights' => ['logout']],
     ['label' => 'Logout', 'url' => 'logout.php', 'rights' => ['logout']],
 ];
 
