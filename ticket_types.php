@@ -64,6 +64,7 @@ $stmt->execute([$account_id]);
 $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<?php
 $pageTitle = 'Ticket Type Management • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

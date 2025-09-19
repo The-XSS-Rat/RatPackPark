@@ -152,6 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy'], $_POST['type']
     }
 }
 ?>
+<?php
 $pageTitle = 'Daily Operations • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

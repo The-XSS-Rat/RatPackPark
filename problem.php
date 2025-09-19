@@ -71,6 +71,7 @@ if (isset($_GET['view'])) {
 }
 ?>
 
+<?php
 $pageTitle = 'Report a Problem • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

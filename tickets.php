@@ -100,6 +100,7 @@ if (isset($_GET['sales_audit']) && (int)$_GET['sales_audit'] === 1) {
 }
 ?>
 
+<?php
 $pageTitle = 'Ticket Sales • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

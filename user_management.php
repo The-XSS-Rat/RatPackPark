@@ -77,6 +77,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 }
 ?>
 
+<?php
 $pageTitle = 'User Management • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

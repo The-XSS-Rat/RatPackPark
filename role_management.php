@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->query("SELECT r.id, r.name, GROUP_CONCAT(rr.right_name ORDER BY rr.right_name SEPARATOR ', ') AS rights FROM roles r LEFT JOIN role_rights rr ON r.id = rr.role_id GROUP BY r.id, r.name ORDER BY r.id");
 $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<?php
 $pageTitle = 'Role Management • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';
