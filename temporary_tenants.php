@@ -27,6 +27,31 @@ if (!function_exists('ensureTemporaryTenantSchema')) {
     }
 }
 
+if (!function_exists('rat_track_store_tenant_meta')) {
+    function rat_track_store_tenant_meta(array $tenant): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (isset($tenant['id'])) {
+            $_SESSION['temporary_tenant_id'] = (int)$tenant['id'];
+        }
+        if (isset($tenant['account_id'])) {
+            $_SESSION['temporary_tenant_account_id'] = (int)$tenant['account_id'];
+        }
+
+        if (!empty($tenant['created_at'])) {
+            try {
+                $createdAt = new DateTime($tenant['created_at'], new DateTimeZone('UTC'));
+                $_SESSION['temporary_tenant_started_at'] = $createdAt->getTimestamp();
+            } catch (Throwable $e) {
+                // Leave the timer unset if we fail to parse the timestamp
+            }
+        }
+    }
+}
+
 if (!function_exists('cleanupExpiredTemporaryTenants')) {
     function cleanupExpiredTemporaryTenants(PDO $pdo): void
     {
@@ -95,6 +120,7 @@ if (!function_exists('getActiveTemporaryTenant')) {
             return null;
         }
 
+        rat_track_store_tenant_meta($tenant);
         return $tenant;
     }
 }
@@ -171,9 +197,7 @@ if (!function_exists('createTemporaryTenant')) {
                 throw new RuntimeException('Temporary tenant was created but could not be reloaded.');
             }
 
-            if (session_status() === PHP_SESSION_ACTIVE) {
-                $_SESSION['temporary_tenant_id'] = $tempId;
-            }
+            rat_track_store_tenant_meta($record);
             return $record;
         } catch (Throwable $e) {
             $pdo->rollBack();
@@ -208,4 +232,32 @@ if (!function_exists('generateReadablePassword')) {
         }
         return $password;
     }
+}
+
+if (basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'] ?? '')) {
+    require_once 'vendor/autoload.php';
+    require_once 'db.php';
+
+    session_start();
+
+    ensureTemporaryTenantSchema($pdo);
+    cleanupExpiredTemporaryTenants($pdo);
+
+    $sessionId = session_id();
+    $tenant = getActiveTemporaryTenant($pdo, $sessionId);
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($tenant === null) {
+            $tenant = createTemporaryTenant($pdo, $sessionId);
+        }
+    }
+
+    if ($tenant !== null) {
+        $_SESSION['temporary_tenant_id'] = $tenant['id'];
+        header('Location: generate_tenant.php');
+        exit;
+    }
+
+    header('Location: index.php');
+    exit;
 }

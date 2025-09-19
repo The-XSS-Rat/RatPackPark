@@ -26,6 +26,30 @@ body {
     min-height: 100vh;
 }
 
+html.is-embedded,
+html.is-embedded body {
+    background: none;
+}
+
+html.is-embedded body {
+    min-height: auto;
+}
+
+html.is-embedded .aurora,
+html.is-embedded .top-nav,
+html.is-embedded .site-footer {
+    display: none;
+}
+
+html.is-embedded .app-shell {
+    min-height: auto;
+    box-shadow: none;
+}
+
+html.is-embedded .main-content {
+    padding: 0 0 32px;
+}
+
 .aurora {
     position: fixed;
     inset: 0;
@@ -466,8 +490,109 @@ body {
     box-shadow: 0 18px 45px rgba(27, 17, 85, 0.1);
 }
 
+.module-card--speedrun {
+    background: linear-gradient(135deg, rgba(93, 44, 168, 0.12), rgba(255, 95, 162, 0.12));
+    border: 1px solid rgba(93, 44, 168, 0.18);
+}
+
 .module-card + .module-card {
     margin-top: 24px;
+}
+
+.speedrun-status {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.speedrun-status li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.65);
+    font-weight: 600;
+}
+
+.speedrun-status li span:last-child {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.speedrun-status li.speedrun-status--unlocked {
+    background: rgba(76, 175, 80, 0.18);
+    color: #1b5e20;
+}
+
+.speedrun-status li.speedrun-status--locked {
+    background: rgba(93, 44, 168, 0.1);
+    color: var(--park-purple);
+}
+
+.guide-details {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.guide-details__content {
+    position: relative;
+    z-index: 1;
+}
+
+.guide-details__time {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--park-purple);
+}
+
+.guide-details__mask {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+    text-align: center;
+    background: rgba(32, 0, 64, 0.82);
+    color: #f9f5ff;
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.guide-details__mask strong {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+}
+
+.guide-details__mask p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.guide-details--locked .guide-details__content {
+    filter: blur(8px);
+    user-select: none;
+    pointer-events: none;
+}
+
+.guide-details--locked .guide-details__mask {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.guide-details__mask-hint {
+    font-size: 0.8rem;
+    opacity: 0.85;
 }
 
 .module-card__title {

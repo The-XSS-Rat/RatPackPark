@@ -26,6 +26,45 @@ if (!in_array('logout', $rights)) {
     exit;
 }
 
+if (!function_exists('rat_track_format_interval')) {
+    function rat_track_format_interval(int $seconds): string
+    {
+        $seconds = max(0, $seconds);
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        $remaining = $seconds % 60;
+        if ($hours > 0) {
+            return sprintf('%d:%02d:%02d', $hours, $minutes, $remaining);
+        }
+
+        return sprintf('%02d:%02d', $minutes, $remaining);
+    }
+}
+
+$speedrunUnlocks = [
+    'BAC' => null,
+    'IDOR' => null,
+];
+
+if (
+    isset($_SESSION['temporary_tenant_id'], $_SESSION['rat_speedrun']) &&
+    is_array($_SESSION['rat_speedrun'])
+) {
+    $tenantId = (int)$_SESSION['temporary_tenant_id'];
+    if (
+        isset($_SESSION['rat_speedrun'][$tenantId]) &&
+        is_array($_SESSION['rat_speedrun'][$tenantId]) &&
+        !empty($_SESSION['rat_speedrun'][$tenantId]['categories']) &&
+        is_array($_SESSION['rat_speedrun'][$tenantId]['categories'])
+    ) {
+        foreach (['BAC', 'IDOR'] as $categoryKey) {
+            if (isset($_SESSION['rat_speedrun'][$tenantId]['categories'][$categoryKey]['elapsed'])) {
+                $speedrunUnlocks[$categoryKey] = (int)$_SESSION['rat_speedrun'][$tenantId]['categories'][$categoryKey]['elapsed'];
+            }
+        }
+    }
+}
+
 $vulnerabilities = [
     [
         'category' => 'IDOR, Inter-tenant IDOR',
@@ -144,8 +183,36 @@ include 'partials/header.php';
             <span class="hero-badge">Vulnerability radar</span>
             <h1 class="hero-title">Documented weaknesses hiding in plain sight</h1>
             <p class="hero-lead">
-                Every issue we’ve shipped for the lab—complete with exploitation notes—lives here for quick reference.
+                Race the clock to unlock the full BAC &amp; IDOR playbook for this tenant. Your scoreboard timer started when the
+                sandbox spun up.
             </p>
+        </div>
+
+        <div class="module-card module-card--speedrun">
+            <h2 class="module-card__title">Speedrun progress</h2>
+            <p class="module-card__subtitle">Trigger each class of bug in your tenant to unmask the redacted guidance.</p>
+            <ul class="speedrun-status">
+                <li class="<?php echo $speedrunUnlocks['IDOR'] !== null ? 'speedrun-status--unlocked' : 'speedrun-status--locked'; ?>">
+                    <span>IDOR intel</span>
+                    <span>
+                        <?php if ($speedrunUnlocks['IDOR'] !== null): ?>
+                            T+<?php echo htmlspecialchars(rat_track_format_interval($speedrunUnlocks['IDOR'])); ?>
+                        <?php else: ?>
+                            Locked
+                        <?php endif; ?>
+                    </span>
+                </li>
+                <li class="<?php echo $speedrunUnlocks['BAC'] !== null ? 'speedrun-status--unlocked' : 'speedrun-status--locked'; ?>">
+                    <span>BAC intel</span>
+                    <span>
+                        <?php if ($speedrunUnlocks['BAC'] !== null): ?>
+                            T+<?php echo htmlspecialchars(rat_track_format_interval($speedrunUnlocks['BAC'])); ?>
+                        <?php else: ?>
+                            Locked
+                        <?php endif; ?>
+                    </span>
+                </li>
+            </ul>
         </div>
 
         <div class="module-card">
@@ -161,6 +228,26 @@ include 'partials/header.php';
                 </thead>
                 <tbody>
                     <?php foreach ($vulnerabilities as $entry): ?>
+                        <?php
+                        $categoryString = $entry['category'];
+                        $requiresBac = stripos($categoryString, 'BAC') !== false;
+                        $requiresIdor = stripos($categoryString, 'IDOR') !== false;
+                        $locks = [];
+                        if ($requiresBac && $speedrunUnlocks['BAC'] === null) {
+                            $locks[] = 'Trigger a BAC exploit to reveal this walkthrough.';
+                        }
+                        if ($requiresIdor && $speedrunUnlocks['IDOR'] === null) {
+                            $locks[] = 'Trigger an IDOR exploit to reveal this walkthrough.';
+                        }
+                        $isLocked = !empty($locks);
+                        $unlockTimes = [];
+                        if ($requiresIdor && $speedrunUnlocks['IDOR'] !== null) {
+                            $unlockTimes[] = 'IDOR T+' . rat_track_format_interval($speedrunUnlocks['IDOR']);
+                        }
+                        if ($requiresBac && $speedrunUnlocks['BAC'] !== null) {
+                            $unlockTimes[] = 'BAC T+' . rat_track_format_interval($speedrunUnlocks['BAC']);
+                        }
+                        ?>
                         <tr>
                             <td>
                                 <?php foreach (explode(',', $entry['category']) as $tag): ?>
@@ -172,8 +259,24 @@ include 'partials/header.php';
                             </td>
                             <td><?php echo htmlspecialchars($entry['title']); ?></td>
                             <td>
-                                <div><?php echo $entry['details']; ?></div>
-                                <div style="margin-top: 6px;"><strong>How to exploit:</strong> <?php echo $entry['exploit']; ?></div>
+                                <div class="guide-details<?php echo $isLocked ? ' guide-details--locked' : ''; ?>">
+                                    <div class="guide-details__content">
+                                        <div><?php echo $entry['details']; ?></div>
+                                        <div style="margin-top: 6px;"><strong>How to exploit:</strong> <?php echo $entry['exploit']; ?></div>
+                                        <?php if (!$isLocked && !empty($unlockTimes)): ?>
+                                            <div class="guide-details__time">Unlocked at <?php echo htmlspecialchars(implode(' • ', $unlockTimes)); ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if ($isLocked): ?>
+                                        <div class="guide-details__mask">
+                                            <strong>Intel locked</strong>
+                                            <?php foreach ($locks as $lockMessage): ?>
+                                                <p><?php echo htmlspecialchars($lockMessage); ?></p>
+                                            <?php endforeach; ?>
+                                            <p class="guide-details__mask-hint">Speedrun the vulnerability inside this tenant to lift the veil.</p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
