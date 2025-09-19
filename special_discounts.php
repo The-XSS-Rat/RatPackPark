@@ -72,6 +72,7 @@ $stmt = $pdo->prepare("SELECT id, name FROM tickets WHERE account_id = ?");
 $stmt->execute([$account_id]);
 $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<?php
 $pageTitle = 'Special Discounts • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

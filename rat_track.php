@@ -173,6 +173,7 @@ $vulnerabilities = [
     ],
 ];
 ?>
+<?php
 $pageTitle = 'Rat Track • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

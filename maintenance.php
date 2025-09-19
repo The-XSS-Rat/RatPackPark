@@ -26,6 +26,7 @@ if (!in_array('maintenance', $rights)) {
     exit;
 }
 ?>
+<?php
 $pageTitle = 'Maintenance • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

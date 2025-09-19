@@ -34,6 +34,7 @@ $stmt->execute([$user_id]);
 $shifts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<?php
 $pageTitle = 'My Roster • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

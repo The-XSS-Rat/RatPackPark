@@ -64,6 +64,7 @@ if (isset($_GET['notes'])) {
     }
 }
 ?>
+<?php
 $pageTitle = 'Incident Command • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

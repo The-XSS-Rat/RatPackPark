@@ -53,6 +53,7 @@ foreach ($roles as $r) {
     $role_map[$r['id']] = $r['name'];
 }
 ?>
+<?php
 $pageTitle = 'Assign Roles • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';

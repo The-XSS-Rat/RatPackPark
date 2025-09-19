@@ -95,6 +95,7 @@ $stmt->execute([$account_id]);
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<?php
 $pageTitle = 'Staff Rosters • RatPack Park';
 $activePage = 'dashboard';
 include 'partials/header.php';
