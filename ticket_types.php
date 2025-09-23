@@ -98,43 +98,45 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Existing ticket types</h2>
             <p class="module-card__subtitle">Edit live products or purge them completely.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Available</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($tickets)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Existing ticket types table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="5">No ticket types yet. Add one above to start selling.</td>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Available</th>
+                            <th>Created</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($tickets as $ticket): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($tickets)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($ticket['name']); ?></td>
-                                <td>€<?php echo number_format($ticket['price'], 2); ?></td>
-                                <td><?php echo htmlspecialchars((string) $ticket['available_quantity']); ?></td>
-                                <td><?php echo htmlspecialchars($ticket['created_at']); ?></td>
-                                <td>
-                                    <form class="module-form module-form--inline" method="POST">
-                                        <input type="hidden" name="edit_ticket_type_id" value="<?php echo $ticket['id']; ?>">
-                                        <input class="input-field" type="text" name="edit_name" value="<?php echo htmlspecialchars($ticket['name']); ?>">
-                                        <input class="input-field" type="number" step="0.01" name="edit_price" value="<?php echo $ticket['price']; ?>">
-                                        <input class="input-field" type="number" name="edit_quantity" value="<?php echo $ticket['available_quantity']; ?>">
-                                        <button class="btn btn-outline" type="submit">Update</button>
-                                        <a class="module-link" href="?delete=<?php echo $ticket['id']; ?>" onclick="return confirm('Delete this ticket type?');">Delete</a>
-                                    </form>
-                                </td>
+                                <td colspan="5">No ticket types yet. Add one above to start selling.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($tickets as $ticket): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($ticket['name']); ?></td>
+                                    <td>€<?php echo number_format($ticket['price'], 2); ?></td>
+                                    <td><?php echo htmlspecialchars((string) $ticket['available_quantity']); ?></td>
+                                    <td><?php echo htmlspecialchars($ticket['created_at']); ?></td>
+                                    <td>
+                                        <form class="module-form module-form--inline" method="POST">
+                                            <input type="hidden" name="edit_ticket_type_id" value="<?php echo $ticket['id']; ?>">
+                                            <input class="input-field" type="text" name="edit_name" value="<?php echo htmlspecialchars($ticket['name']); ?>">
+                                            <input class="input-field" type="number" step="0.01" name="edit_price" value="<?php echo $ticket['price']; ?>">
+                                            <input class="input-field" type="number" name="edit_quantity" value="<?php echo $ticket['available_quantity']; ?>">
+                                            <button class="btn btn-outline" type="submit">Update</button>
+                                            <a class="module-link" href="?delete=<?php echo $ticket['id']; ?>" onclick="return confirm('Delete this ticket type?');">Delete</a>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

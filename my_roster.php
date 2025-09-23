@@ -52,30 +52,32 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Scheduled shifts</h2>
             <p class="module-card__subtitle">Your roster updates live as supervisors adjust coverage.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Start</th>
-                        <th>End</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($shifts)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Scheduled shifts table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="3">No shifts scheduled. Check back once you’ve been assigned.</td>
+                            <th>Date</th>
+                            <th>Start</th>
+                            <th>End</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($shifts as $shift): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($shifts)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($shift['shift_date']); ?></td>
-                                <td><?php echo htmlspecialchars($shift['start_time']); ?></td>
-                                <td><?php echo htmlspecialchars($shift['end_time']); ?></td>
+                                <td colspan="3">No shifts scheduled. Check back once you’ve been assigned.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($shifts as $shift): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($shift['shift_date']); ?></td>
+                                    <td><?php echo htmlspecialchars($shift['start_time']); ?></td>
+                                    <td><?php echo htmlspecialchars($shift['end_time']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

@@ -121,45 +121,47 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Existing staff</h2>
             <p class="module-card__subtitle">Adjust roles or remove accounts that no longer need access.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($users)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Existing staff table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="5">No users found for this tenant.</td>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Created</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($users as $user): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($users)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                <td><?php echo htmlspecialchars($roles[$user['role_id']] ?? 'Unknown'); ?></td>
-                                <td><?php echo htmlspecialchars($user['created_at']); ?></td>
-                                <td>
-                                    <form class="module-form module-form--inline" method="POST">
-                                        <input type="hidden" name="edit_user_id" value="<?php echo $user['id']; ?>">
-                                        <select class="input-field" name="edit_role_id">
-                                            <?php foreach ($roles as $id => $label): ?>
-                                                <option value="<?php echo $id; ?>" <?php echo $id == $user['role_id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <button class="btn btn-outline" type="submit">Update</button>
-                                        <a class="module-link" href="?delete=<?php echo $user['id']; ?>" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
-                                    </form>
-                                </td>
+                                <td colspan="5">No users found for this tenant.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($users as $user): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td><?php echo htmlspecialchars($roles[$user['role_id']] ?? 'Unknown'); ?></td>
+                                    <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                                    <td>
+                                        <form class="module-form module-form--inline" method="POST">
+                                            <input type="hidden" name="edit_user_id" value="<?php echo $user['id']; ?>">
+                                            <select class="input-field" name="edit_role_id">
+                                                <?php foreach ($roles as $id => $label): ?>
+                                                    <option value="<?php echo $id; ?>" <?php echo $id == $user['role_id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <button class="btn btn-outline" type="submit">Update</button>
+                                            <a class="module-link" href="?delete=<?php echo $user['id']; ?>" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

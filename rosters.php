@@ -131,48 +131,50 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Upcoming coverage</h2>
             <p class="module-card__subtitle">Edit on the fly or remove assignments as your staffing picture changes.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Team member</th>
-                        <th>Date</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($shifts)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Upcoming coverage table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="5">No shifts scheduled yet. Create one above to get today’s roster rolling.</td>
+                            <th>Team member</th>
+                            <th>Date</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($shifts as $shift): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($shifts)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($shift['username']); ?></td>
-                                <td><?php echo htmlspecialchars($shift['shift_date']); ?></td>
-                                <td><?php echo htmlspecialchars($shift['start_time']); ?></td>
-                                <td><?php echo htmlspecialchars($shift['end_time']); ?></td>
-                                <td>
-                                    <form method="POST" class="module-form module-form--inline">
-                                        <input type="hidden" name="edit_shift_id" value="<?php echo $shift['id']; ?>">
-                                        <select class="input-field" name="edit_user_id">
-                                            <?php foreach ($users as $u): ?>
-                                                <option value="<?php echo $u['id']; ?>" <?php echo $u['id'] == $shift['user_id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($u['username']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <input class="input-field" type="date" name="edit_shift_date" value="<?php echo $shift['shift_date']; ?>">
-                                        <input class="input-field" type="time" name="edit_start_time" value="<?php echo $shift['start_time']; ?>">
-                                        <input class="input-field" type="time" name="edit_end_time" value="<?php echo $shift['end_time']; ?>">
-                                        <button class="btn btn-outline" type="submit">Update</button>
-                                        <a class="module-link" href="?delete=<?php echo $shift['id']; ?>" onclick="return confirm('Delete this shift?');">Delete</a>
-                                    </form>
-                                </td>
+                                <td colspan="5">No shifts scheduled yet. Create one above to get today’s roster rolling.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($shifts as $shift): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($shift['username']); ?></td>
+                                    <td><?php echo htmlspecialchars($shift['shift_date']); ?></td>
+                                    <td><?php echo htmlspecialchars($shift['start_time']); ?></td>
+                                    <td><?php echo htmlspecialchars($shift['end_time']); ?></td>
+                                    <td>
+                                        <form method="POST" class="module-form module-form--inline">
+                                            <input type="hidden" name="edit_shift_id" value="<?php echo $shift['id']; ?>">
+                                            <select class="input-field" name="edit_user_id">
+                                                <?php foreach ($users as $u): ?>
+                                                    <option value="<?php echo $u['id']; ?>" <?php echo $u['id'] == $shift['user_id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($u['username']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <input class="input-field" type="date" name="edit_shift_date" value="<?php echo $shift['shift_date']; ?>">
+                                            <input class="input-field" type="time" name="edit_start_time" value="<?php echo $shift['start_time']; ?>">
+                                            <input class="input-field" type="time" name="edit_end_time" value="<?php echo $shift['end_time']; ?>">
+                                            <button class="btn btn-outline" type="submit">Update</button>
+                                            <a class="module-link" href="?delete=<?php echo $shift['id']; ?>" onclick="return confirm('Delete this shift?');">Delete</a>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

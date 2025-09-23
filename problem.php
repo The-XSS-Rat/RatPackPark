@@ -146,32 +146,34 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">My submitted reports</h2>
             <p class="module-card__subtitle">Every problem you’ve escalated, ready for follow-up.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Submitted</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($reports)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="My submitted reports table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="4">You have not submitted any reports yet.</td>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($reports as $r): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($reports)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($r['category']); ?></td>
-                                <td><?php echo htmlspecialchars($r['description']); ?></td>
-                                <td><?php echo htmlspecialchars($r['status']); ?></td>
-                                <td><?php echo htmlspecialchars($r['submitted_at']); ?></td>
+                                <td colspan="4">You have not submitted any reports yet.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($reports as $r): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($r['category']); ?></td>
+                                    <td><?php echo htmlspecialchars($r['description']); ?></td>
+                                    <td><?php echo htmlspecialchars($r['status']); ?></td>
+                                    <td><?php echo htmlspecialchars($r['submitted_at']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>
