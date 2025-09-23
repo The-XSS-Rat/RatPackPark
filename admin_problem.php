@@ -112,48 +112,50 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Problem queue</h2>
             <p class="module-card__subtitle">Advance cases, peek at foreign tenants, and keep the park spotless.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Submitted by</th>
-                        <th>Category</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Submitted</th>
-                        <th>Update</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($reports)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Problem queue table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="6">No incidents logged. Encourage teams to report issues from the field.</td>
+                            <th>Submitted by</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>Update</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($reports as $report): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($reports)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($report['username']); ?></td>
-                                <td><?php echo htmlspecialchars($report['category']); ?></td>
-                                <td><?php echo htmlspecialchars($report['description']); ?></td>
-                                <td><?php echo htmlspecialchars($report['status']); ?></td>
-                                <td><?php echo htmlspecialchars($report['submitted_at']); ?></td>
-                                <td>
-                                    <form method="POST" class="module-form module-form--inline">
-                                        <input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
-                                        <select class="input-field" name="new_status">
-                                            <option value="open" <?php echo $report['status'] == 'open' ? 'selected' : ''; ?>>Open</option>
-                                            <option value="in_progress" <?php echo $report['status'] == 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                            <option value="resolved" <?php echo $report['status'] == 'resolved' ? 'selected' : ''; ?>>Resolved</option>
-                                            <option value="wont_resolve" <?php echo $report['status'] == 'wont_resolve' ? 'selected' : ''; ?>>Won't Resolve</option>
-                                        </select>
-                                        <button class="btn btn-outline" type="submit">Update</button>
-                                        <a class="module-link" href="?notes=<?php echo $report['id']; ?>">Notes</a>
-                                    </form>
-                                </td>
+                                <td colspan="6">No incidents logged. Encourage teams to report issues from the field.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($reports as $report): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($report['username']); ?></td>
+                                    <td><?php echo htmlspecialchars($report['category']); ?></td>
+                                    <td><?php echo htmlspecialchars($report['description']); ?></td>
+                                    <td><?php echo htmlspecialchars($report['status']); ?></td>
+                                    <td><?php echo htmlspecialchars($report['submitted_at']); ?></td>
+                                    <td>
+                                        <form method="POST" class="module-form module-form--inline">
+                                            <input type="hidden" name="report_id" value="<?php echo $report['id']; ?>">
+                                            <select class="input-field" name="new_status">
+                                                <option value="open" <?php echo $report['status'] == 'open' ? 'selected' : ''; ?>>Open</option>
+                                                <option value="in_progress" <?php echo $report['status'] == 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                                                <option value="resolved" <?php echo $report['status'] == 'resolved' ? 'selected' : ''; ?>>Resolved</option>
+                                                <option value="wont_resolve" <?php echo $report['status'] == 'wont_resolve' ? 'selected' : ''; ?>>Won't Resolve</option>
+                                            </select>
+                                            <button class="btn btn-outline" type="submit">Update</button>
+                                            <a class="module-link" href="?notes=<?php echo $report['id']; ?>">Notes</a>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

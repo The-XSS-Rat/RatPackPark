@@ -748,10 +748,39 @@ body.nav-open::before {
     border-color: rgba(255, 204, 41, 0.32);
 }
 
+.module-table__wrapper {
+    margin-top: 24px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 20px;
+    box-shadow: inset 0 0 0 1px rgba(93, 44, 168, 0.08);
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.module-table__wrapper:focus-within {
+    box-shadow: inset 0 0 0 2px rgba(93, 44, 168, 0.2);
+}
+
+.module-table__wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.module-table__wrapper::-webkit-scrollbar-thumb {
+    background: rgba(93, 44, 168, 0.25);
+    border-radius: 999px;
+}
+
+.module-table__wrapper::-webkit-scrollbar-track {
+    background: rgba(93, 44, 168, 0.08);
+    border-radius: 999px;
+}
+
 .module-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 24px;
+    margin-top: 0;
+    min-width: 640px;
 }
 
 .module-table thead {
@@ -1115,6 +1144,16 @@ textarea.input-field:focus {
         padding: 26px;
     }
 
+    .module-table__wrapper {
+        margin-left: -4px;
+        margin-right: -4px;
+        padding: 0 4px 12px;
+    }
+
+    .module-table {
+        min-width: 560px;
+    }
+
     .module-table th,
     .module-table td {
         padding: 12px 14px;
@@ -1180,6 +1219,28 @@ textarea.input-field:focus {
     .module-stage {
         min-height: 420px;
     }
+
+    .module-form--inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .module-form--inline .input-field,
+    .module-form--inline .btn,
+    .module-form--inline .module-link {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .module-form--inline .module-link {
+        justify-content: center;
+        margin-left: 0;
+    }
+
+    .module-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 @media (max-width: 540px) {
@@ -1242,5 +1303,9 @@ textarea.input-field:focus {
     .module-card {
         padding: 22px;
         border-radius: 22px;
+    }
+
+    .module-table {
+        min-width: 520px;
     }
 }

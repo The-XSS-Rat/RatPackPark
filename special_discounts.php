@@ -112,34 +112,36 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Active &amp; scheduled offers</h2>
             <p class="module-card__subtitle">Review every discount running across your catalog. Delete one to roll pricing back immediately.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Ticket</th>
-                        <th>Starts</th>
-                        <th>Ends</th>
-                        <th>Discount %</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($discounts)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Active and scheduled discount offers table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="5">No discounts configured. Launch one above to spark a rush at the gates.</td>
+                            <th>Ticket</th>
+                            <th>Starts</th>
+                            <th>Ends</th>
+                            <th>Discount %</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($discounts as $disc): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($discounts)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($disc['ticket_name']); ?></td>
-                                <td><?php echo htmlspecialchars($disc['start_datetime']); ?></td>
-                                <td><?php echo htmlspecialchars($disc['end_datetime']); ?></td>
-                                <td><?php echo htmlspecialchars((string) $disc['discount_percent']); ?></td>
-                                <td><a class="module-link" href="?delete=<?php echo $disc['id']; ?>" onclick="return confirm('Delete this discount?');">Delete</a></td>
+                                <td colspan="5">No discounts configured. Launch one above to spark a rush at the gates.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($discounts as $disc): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($disc['ticket_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($disc['start_datetime']); ?></td>
+                                    <td><?php echo htmlspecialchars($disc['end_datetime']); ?></td>
+                                    <td><?php echo htmlspecialchars((string) $disc['discount_percent']); ?></td>
+                                    <td><a class="module-link" href="?delete=<?php echo $disc['id']; ?>" onclick="return confirm('Delete this discount?');">Delete</a></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

@@ -98,28 +98,30 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Current roster</h2>
             <p class="module-card__subtitle">Review the roles everyone already holds.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Current role</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($users)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Current roster table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="2">No users found.</td>
+                            <th>User</th>
+                            <th>Current role</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($users as $u): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($users)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($u['username']); ?></td>
-                                <td><?php echo htmlspecialchars($role_map[$u['role_id']] ?? 'Unknown'); ?></td>
+                                <td colspan="2">No users found.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($users as $u): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($u['username']); ?></td>
+                                    <td><?php echo htmlspecialchars($role_map[$u['role_id']] ?? 'Unknown'); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

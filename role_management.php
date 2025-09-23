@@ -85,30 +85,32 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Defined roles</h2>
             <p class="module-card__subtitle">Inspect every role and the rights it grants.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Rights</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($roles)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Defined roles table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="3">No roles have been defined yet.</td>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Rights</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($roles as $role): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($roles)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($role['id']); ?></td>
-                                <td><?php echo htmlspecialchars($role['name']); ?></td>
-                                <td><?php echo htmlspecialchars($role['rights'] ?? ''); ?></td>
+                                <td colspan="3">No roles have been defined yet.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($roles as $role): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($role['id']); ?></td>
+                                    <td><?php echo htmlspecialchars($role['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($role['rights'] ?? ''); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

@@ -218,71 +218,73 @@ include 'partials/header.php';
 
         <div class="module-card">
             <h2 class="module-card__title">Known issues</h2>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Endpoint</th>
-                        <th>Issue</th>
-                        <th>Details &amp; exploitation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($vulnerabilities as $entry): ?>
-                        <?php
-                        $categoryString = $entry['category'];
-                        $requiresBac = stripos($categoryString, 'BAC') !== false;
-                        $requiresIdor = stripos($categoryString, 'IDOR') !== false;
-                        $locks = [];
-                        if ($requiresBac && $speedrunUnlocks['BAC'] === null) {
-                            $locks[] = 'Trigger a BAC exploit to reveal this walkthrough.';
-                        }
-                        if ($requiresIdor && $speedrunUnlocks['IDOR'] === null) {
-                            $locks[] = 'Trigger an IDOR exploit to reveal this walkthrough.';
-                        }
-                        $isLocked = !empty($locks);
-                        $unlockTimes = [];
-                        if ($requiresIdor && $speedrunUnlocks['IDOR'] !== null) {
-                            $unlockTimes[] = 'IDOR T+' . rat_track_format_interval($speedrunUnlocks['IDOR']);
-                        }
-                        if ($requiresBac && $speedrunUnlocks['BAC'] !== null) {
-                            $unlockTimes[] = 'BAC T+' . rat_track_format_interval($speedrunUnlocks['BAC']);
-                        }
-                        ?>
+            <div class="module-table__wrapper" role="region" aria-label="Known issues table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td>
-                                <?php foreach (explode(',', $entry['category']) as $tag): ?>
-                                    <span class="module-pill"><?php echo htmlspecialchars(trim($tag)); ?></span>
-                                <?php endforeach; ?>
-                            </td>
-                            <td>
-                                <a class="module-link" href="<?php echo htmlspecialchars($entry['endpoint']); ?>" target="mainframe"><?php echo htmlspecialchars($entry['endpoint']); ?></a>
-                            </td>
-                            <td><?php echo htmlspecialchars($entry['title']); ?></td>
-                            <td>
-                                <div class="guide-details<?php echo $isLocked ? ' guide-details--locked' : ''; ?>">
-                                    <div class="guide-details__content">
-                                        <div><?php echo $entry['details']; ?></div>
-                                        <div style="margin-top: 6px;"><strong>How to exploit:</strong> <?php echo $entry['exploit']; ?></div>
-                                        <?php if (!$isLocked && !empty($unlockTimes)): ?>
-                                            <div class="guide-details__time">Unlocked at <?php echo htmlspecialchars(implode(' • ', $unlockTimes)); ?></div>
+                            <th>Category</th>
+                            <th>Endpoint</th>
+                            <th>Issue</th>
+                            <th>Details &amp; exploitation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($vulnerabilities as $entry): ?>
+                            <?php
+                            $categoryString = $entry['category'];
+                            $requiresBac = stripos($categoryString, 'BAC') !== false;
+                            $requiresIdor = stripos($categoryString, 'IDOR') !== false;
+                            $locks = [];
+                            if ($requiresBac && $speedrunUnlocks['BAC'] === null) {
+                                $locks[] = 'Trigger a BAC exploit to reveal this walkthrough.';
+                            }
+                            if ($requiresIdor && $speedrunUnlocks['IDOR'] === null) {
+                                $locks[] = 'Trigger an IDOR exploit to reveal this walkthrough.';
+                            }
+                            $isLocked = !empty($locks);
+                            $unlockTimes = [];
+                            if ($requiresIdor && $speedrunUnlocks['IDOR'] !== null) {
+                                $unlockTimes[] = 'IDOR T+' . rat_track_format_interval($speedrunUnlocks['IDOR']);
+                            }
+                            if ($requiresBac && $speedrunUnlocks['BAC'] !== null) {
+                                $unlockTimes[] = 'BAC T+' . rat_track_format_interval($speedrunUnlocks['BAC']);
+                            }
+                            ?>
+                            <tr>
+                                <td>
+                                    <?php foreach (explode(',', $entry['category']) as $tag): ?>
+                                        <span class="module-pill"><?php echo htmlspecialchars(trim($tag)); ?></span>
+                                    <?php endforeach; ?>
+                                </td>
+                                <td>
+                                    <a class="module-link" href="<?php echo htmlspecialchars($entry['endpoint']); ?>" target="mainframe"><?php echo htmlspecialchars($entry['endpoint']); ?></a>
+                                </td>
+                                <td><?php echo htmlspecialchars($entry['title']); ?></td>
+                                <td>
+                                    <div class="guide-details<?php echo $isLocked ? ' guide-details--locked' : ''; ?>">
+                                        <div class="guide-details__content">
+                                            <div><?php echo $entry['details']; ?></div>
+                                            <div style="margin-top: 6px;"><strong>How to exploit:</strong> <?php echo $entry['exploit']; ?></div>
+                                            <?php if (!$isLocked && !empty($unlockTimes)): ?>
+                                                <div class="guide-details__time">Unlocked at <?php echo htmlspecialchars(implode(' • ', $unlockTimes)); ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php if ($isLocked): ?>
+                                            <div class="guide-details__mask">
+                                                <strong>Intel locked</strong>
+                                                <?php foreach ($locks as $lockMessage): ?>
+                                                    <p><?php echo htmlspecialchars($lockMessage); ?></p>
+                                                <?php endforeach; ?>
+                                                <p class="guide-details__mask-hint">Speedrun the vulnerability inside this tenant to lift the veil.</p>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
-                                    <?php if ($isLocked): ?>
-                                        <div class="guide-details__mask">
-                                            <strong>Intel locked</strong>
-                                            <?php foreach ($locks as $lockMessage): ?>
-                                                <p><?php echo htmlspecialchars($lockMessage); ?></p>
-                                            <?php endforeach; ?>
-                                            <p class="guide-details__mask-hint">Speedrun the vulnerability inside this tenant to lift the veil.</p>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>

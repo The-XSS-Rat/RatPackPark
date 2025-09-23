@@ -153,47 +153,49 @@ include 'partials/header.php';
         <div class="module-card">
             <h2 class="module-card__title">Available ticket types</h2>
             <p class="module-card__subtitle">Sell inventory in real time, or inspect a competitor’s catalog for inspiration.</p>
-            <table class="module-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Remaining</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($tickets)): ?>
+            <div class="module-table__wrapper" role="region" aria-label="Available ticket types table">
+                <table class="module-table">
+                    <thead>
                         <tr>
-                            <td colspan="4">No tickets available for sale. Create some types in settings to start earning.</td>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Remaining</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($tickets as $ticket): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($tickets)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($ticket['name']); ?></td>
-                                <td>
-                                    <?php if (!empty($ticket['discounted_price'])): ?>
-                                        <span class="module-pill">Promo active</span>
-                                        <div><s>€<?php echo number_format($ticket['price'], 2); ?></s> €<?php echo number_format($ticket['discounted_price'], 2); ?></div>
-                                    <?php else: ?>
-                                        €<?php echo number_format($ticket['price'], 2); ?>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo htmlspecialchars((string) $ticket['available_quantity']); ?></td>
-                                <td>
-                                    <form method="POST" class="module-form module-form--inline">
-                                        <input type="hidden" name="buy_ticket" value="1">
-                                        <input type="hidden" name="ticket_id" value="<?php echo $ticket['id']; ?>">
-                                        <input class="input-field" type="number" name="quantity" min="1" max="<?php echo $ticket['available_quantity']; ?>" value="1" required>
-                                        <button class="btn btn-primary" type="submit">Record sale</button>
-                                        <a class="module-link" href="?inspect=<?php echo $ticket['id']; ?>">Inspect</a>
-                                    </form>
-                                </td>
+                                <td colspan="4">No tickets available for sale. Create some types in settings to start earning.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($tickets as $ticket): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($ticket['name']); ?></td>
+                                    <td>
+                                        <?php if (!empty($ticket['discounted_price'])): ?>
+                                            <span class="module-pill">Promo active</span>
+                                            <div><s>€<?php echo number_format($ticket['price'], 2); ?></s> €<?php echo number_format($ticket['discounted_price'], 2); ?></div>
+                                        <?php else: ?>
+                                            €<?php echo number_format($ticket['price'], 2); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars((string) $ticket['available_quantity']); ?></td>
+                                    <td>
+                                        <form method="POST" class="module-form module-form--inline">
+                                            <input type="hidden" name="buy_ticket" value="1">
+                                            <input type="hidden" name="ticket_id" value="<?php echo $ticket['id']; ?>">
+                                            <input class="input-field" type="number" name="quantity" min="1" max="<?php echo $ticket['available_quantity']; ?>" value="1" required>
+                                            <button class="btn btn-primary" type="submit">Record sale</button>
+                                            <a class="module-link" href="?inspect=<?php echo $ticket['id']; ?>">Inspect</a>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
             <div class="module-meta">
                 <span>Need deeper data? Append <code>?inspect=&lt;ticket_id&gt;</code> or <code>?sales_audit=1</code> to this view.</span>
             </div>
@@ -203,31 +205,33 @@ include 'partials/header.php';
             <div class="module-card">
                 <h2 class="module-card__title">Global sales audit</h2>
                 <p class="module-card__subtitle">Complete ledger of every transaction across the platform. Foreign tenant rows are highlighted.</p>
-                <table class="module-table">
-                    <thead>
-                        <tr>
-                            <th>Sale #</th>
-                            <th>Ticket</th>
-                            <th>Quantity</th>
-                            <th>Seller</th>
-                            <th>Sold at</th>
-                            <th>Account</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($sales_audit_rows as $sale): ?>
-                            <?php $foreign = isset($sale['account_id']) && (int) $sale['account_id'] !== (int) $account_id; ?>
-                            <tr class="<?php echo $foreign ? 'is-foreign' : ''; ?>">
-                                <td>#<?php echo htmlspecialchars($sale['id']); ?></td>
-                                <td><?php echo htmlspecialchars($sale['ticket_name'] ?? 'Unknown'); ?></td>
-                                <td><?php echo htmlspecialchars((string) $sale['quantity']); ?></td>
-                                <td><?php echo htmlspecialchars($sale['username'] ?? 'Unknown'); ?></td>
-                                <td><?php echo htmlspecialchars($sale['sale_date']); ?></td>
-                                <td><?php echo htmlspecialchars((string) $sale['account_id']); ?></td>
+                <div class="module-table__wrapper" role="region" aria-label="Global ticket sales audit table">
+                    <table class="module-table">
+                        <thead>
+                            <tr>
+                                <th>Sale #</th>
+                                <th>Ticket</th>
+                                <th>Quantity</th>
+                                <th>Seller</th>
+                                <th>Sold at</th>
+                                <th>Account</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($sales_audit_rows as $sale): ?>
+                                <?php $foreign = isset($sale['account_id']) && (int) $sale['account_id'] !== (int) $account_id; ?>
+                                <tr class="<?php echo $foreign ? 'is-foreign' : ''; ?>">
+                                    <td>#<?php echo htmlspecialchars($sale['id']); ?></td>
+                                    <td><?php echo htmlspecialchars($sale['ticket_name'] ?? 'Unknown'); ?></td>
+                                    <td><?php echo htmlspecialchars((string) $sale['quantity']); ?></td>
+                                    <td><?php echo htmlspecialchars($sale['username'] ?? 'Unknown'); ?></td>
+                                    <td><?php echo htmlspecialchars($sale['sale_date']); ?></td>
+                                    <td><?php echo htmlspecialchars((string) $sale['account_id']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>
