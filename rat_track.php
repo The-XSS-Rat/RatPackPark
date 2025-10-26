@@ -171,6 +171,111 @@ $vulnerabilities = [
         'details' => 'Enabling <code>?sales_audit=1</code> dumps every <code>sales</code> record and joins tickets without verifying <code>account_id</code>.',
         'exploit' => 'Use <code>tickets.php?sales_audit=1</code> to enumerate all buyer activity across tenants.'
     ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'guest_feedback.php',
+        'title' => 'Account override reveals rival grievances',
+        'details' => 'Setting <code>?account=</code> rewrites the feedback tenant scope but results render without checking that you belong to that account.',
+        'exploit' => 'Browse to <code>guest_feedback.php?account=2</code> to read another tenant’s complaints and categories.'
+    ],
+    [
+        'category' => 'BAC, IDOR',
+        'endpoint' => 'guest_feedback.php',
+        'title' => 'Status editor mutates foreign reports',
+        'details' => 'The status form updates <code>problem_reports</code> rows solely by id, so you can invent any status string and apply it to other tenants’ incidents.',
+        'exploit' => 'Open a report and submit <code>new_status=resolved</code> to silently close a rival tenant’s escalation.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'guest_feedback.php',
+        'title' => 'View parameter discloses outside incidents',
+        'details' => 'Supplying <code>?view=</code> pulls the requested report with no account check, echoing descriptions, submitter names, and status.',
+        'exploit' => 'Call <code>guest_feedback.php?view=1</code> to inspect an issue filed by a different tenant.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'tenant_directory.php',
+        'title' => 'Directory all switch dumps global staff',
+        'details' => 'Passing <code>&all=1</code> strips away the tenant filter and returns every user record platform-wide.',
+        'exploit' => 'Hit <code>tenant_directory.php?all=1</code> to enumerate usernames and emails for all tenants.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'tenant_directory.php',
+        'title' => 'Account override enumerates rival teams',
+        'details' => 'The <code>?account=</code> parameter is trusted blindly, enabling you to pivot the roster view to any tenant id.',
+        'exploit' => 'Load <code>tenant_directory.php?account=3</code> to review staffing data for another park.'
+    ],
+    [
+        'category' => 'BAC, IDOR',
+        'endpoint' => 'tenant_directory.php',
+        'title' => 'Role assignment trusts caller supplied IDs',
+        'details' => 'Posting the inline form runs <code>UPDATE users SET role_id = ? WHERE id = ?</code> with whatever values you provide, even if the target belongs to another tenant.',
+        'exploit' => 'Change the selector to role ID 1 and submit to grant admin rights to someone in a rival tenant.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'ledger_insights.php',
+        'title' => 'Tenant filter exposes foreign revenue',
+        'details' => 'When <code>?tenant=</code> is present the revenue query simply swaps account ids, displaying sales totals for whichever tenant you request.',
+        'exploit' => 'Request <code>ledger_insights.php?tenant=1</code> to see Fantasy Kingdom’s revenue metrics.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'ledger_insights.php',
+        'title' => 'Raw flag dumps the global sales ledger',
+        'details' => 'Appending <code>&raw=1</code> executes an unrestricted query that lists the latest 50 sales for every tenant.',
+        'exploit' => 'Use <code>ledger_insights.php?raw=1</code> to capture ticket, user, and quantity data across the platform.'
+    ],
+    [
+        'category' => 'BAC, IDOR',
+        'endpoint' => 'ledger_insights.php',
+        'title' => 'Manual injector forges cross-tenant sales',
+        'details' => 'The injection form inserts directly into <code>sales</code> using the ticket id and quantity you supply—negative numbers roll back stock and foreign ticket ids tamper with rival ledgers.',
+        'exploit' => 'Submit <code>ticket_id=&lt;victim&gt;</code> and <code>quantity=-50</code> to rewrite another tenant’s revenue history.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'ride_scheduler.php',
+        'title' => 'Shift list shows every tenant’s coverage',
+        'details' => 'The scheduler query never scopes by account, so anyone with roster access sees staffing rows for all tenants.',
+        'exploit' => 'Simply open <code>ride_scheduler.php</code> to review rival parks’ shift plans.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'ride_scheduler.php',
+        'title' => 'Shift inspector leaks foreign schedules',
+        'details' => '<code>?shift=</code> lookups fetch shift metadata regardless of tenant ownership, revealing operator names and timing.',
+        'exploit' => 'Call <code>ride_scheduler.php?shift=2</code> to pull another tenant’s roster details.'
+    ],
+    [
+        'category' => 'BAC, IDOR',
+        'endpoint' => 'ride_scheduler.php',
+        'title' => 'Reschedule form rewrites other tenants’ shifts',
+        'details' => 'Submitting the reschedule form updates <code>shifts</code> by id with no validation, letting you move staff assigned to another tenant.',
+        'exploit' => 'Post new dates for a rival’s <code>shift_id</code> to sabotage their coverage window.'
+    ],
+    [
+        'category' => 'IDOR',
+        'endpoint' => 'promo_engine.php',
+        'title' => 'Account override hijacks competitor catalog',
+        'details' => 'Passing <code>?account=</code> switches the ticket listing to whichever tenant you target and the UI happily renders their pricing.',
+        'exploit' => 'Visit <code>promo_engine.php?account=1</code> to inspect another park’s ticket lineup.'
+    ],
+    [
+        'category' => 'BAC',
+        'endpoint' => 'promo_engine.php',
+        'title' => 'Flash sale override allows negative stock',
+        'details' => 'The flash sale handler updates price and inventory blindly, so negative deltas or zero pricing are accepted without constraint.',
+        'exploit' => 'Submit <code>inventory_delta=-999</code> to restock or drain a ticket instantly.'
+    ],
+    [
+        'category' => 'BAC, IDOR',
+        'endpoint' => 'promo_engine.php',
+        'title' => 'Discount seeder plants sales for any tenant',
+        'details' => 'Posting <code>seed_discount</code> inserts a discount for whichever <code>ticket_id</code> you choose and accepts any percentage, regardless of ownership.',
+        'exploit' => 'Send <code>percent_off=95</code> with a competitor’s <code>discount_ticket_id</code> to torpedo their prices.'
+    ],
 ];
 ?>
 <?php
