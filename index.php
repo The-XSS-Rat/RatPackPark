@@ -55,6 +55,9 @@ include 'partials/header.php';
                 <a class="btn btn-outline" href="login.php">Sign in</a>
                 <a class="btn btn-accent" href="dashboard.php">View dashboard</a>
             </div>
+            <p class="hero-lead" style="margin-top: 12px;">
+                Solution write-up: <a href="https://medium.com/@olione612/ratpackpark-4135a5de69a7?postPublishedType=repub" target="_blank" rel="noopener">Read the Medium walkthrough</a>
+            </p>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value">4.9/5</div>
