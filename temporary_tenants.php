@@ -85,6 +85,14 @@ if (!function_exists('destroyTemporaryTenant')) {
             $problemDelete = $pdo->prepare("DELETE FROM problem_reports WHERE account_id = ?");
             $problemDelete->execute([$accountId]);
 
+            // Remove sales records that reference users or tickets belonging to this account.
+            // These FK constraints have no cascade, so they must be removed explicitly.
+            $salesDelete = $pdo->prepare(
+                "DELETE FROM sales WHERE user_id IN (SELECT id FROM users WHERE account_id = ?)" .
+                " OR ticket_id IN (SELECT id FROM tickets WHERE account_id = ?)"
+            );
+            $salesDelete->execute([$accountId, $accountId]);
+
             // Deleting the account cascades to users, tickets, shifts, etc.
             $accountDelete = $pdo->prepare("DELETE FROM accounts WHERE id = ?");
             $accountDelete->execute([$accountId]);
